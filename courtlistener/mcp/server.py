@@ -68,6 +68,8 @@ def create_mcp_server(**kwargs):
     favicon_svg_path = assets_dir / "favicon.svg"
     favicon_ico_path = assets_dir / "favicon.ico"
     apple_touch_path = assets_dir / "apple-touch-icon.png"
+    index_html_path = assets_dir / "index.html"
+    icon_cache_headers = {"Cache-Control": "public, max-age=86400"}
 
     favicon_b64 = base64.b64encode(favicon_svg_path.read_bytes()).decode(
         "utf-8"
@@ -110,7 +112,7 @@ def create_mcp_server(**kwargs):
         return FileResponse(
             favicon_svg_path,
             media_type="image/svg+xml",
-            headers=ICON_CACHE_HEADERS,
+            headers=icon_cache_headers,
         )
 
     @mcp.custom_route("/favicon.ico", methods=["GET"])
@@ -118,7 +120,7 @@ def create_mcp_server(**kwargs):
         return FileResponse(
             favicon_ico_path,
             media_type="image/x-icon",
-            headers=ICON_CACHE_HEADERS,
+            headers=icon_cache_headers,
         )
 
     @mcp.custom_route("/apple-touch-icon.png", methods=["GET"])
@@ -126,13 +128,13 @@ def create_mcp_server(**kwargs):
         return FileResponse(
             apple_touch_path,
             media_type="image/png",
-            headers=ICON_CACHE_HEADERS,
+            headers=icon_cache_headers,
         )
 
     # Home page route
     @mcp.custom_route("/", methods=["GET"])
     async def index(request):
-        return HTMLResponse(INDEX_HTML)
+        return FileResponse(index_html_path, media_type="text/html")
 
     # OpenAI Apps directory domain-verification challenge
     @mcp.custom_route("/.well-known/openai-apps-challenge", methods=["GET"])
