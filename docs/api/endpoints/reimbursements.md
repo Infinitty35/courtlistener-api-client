@@ -71,7 +71,7 @@ string
 
 Dates as a text string for the date of reimbursements. This is often conference dates (ex. June 2-6, 2011).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `location`
 
@@ -79,7 +79,7 @@ string
 
 Location of the reimbursement (ex. Harvard Law School, Cambridge, MA).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `source`
 
@@ -87,7 +87,7 @@ string
 
 Source of the reimbursement (ex. FSU Law School).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `purpose`
 
@@ -95,7 +95,7 @@ string
 
 Purpose of the reimbursement (ex. Baseball announcer).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `items_paid_or_provided`
 
@@ -103,7 +103,7 @@ string
 
 Items reimbursed (ex. Room, Airfare).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `financial_disclosure`
 

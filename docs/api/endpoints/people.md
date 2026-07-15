@@ -103,7 +103,7 @@ string
 
 The first name of this person.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `name_middle`
 
@@ -111,7 +111,7 @@ string
 
 The middle name or names of this person
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `name_last`
 
@@ -119,7 +119,7 @@ string
 
 The last name of this person
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `name_suffix`
 
@@ -127,7 +127,7 @@ string
 
 Any suffixes that this person's name may have
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 Choices (6):
 
@@ -162,7 +162,7 @@ string
 
 The city where the person was born.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `dob_state`
 
@@ -170,7 +170,7 @@ string
 
 The state where the person was born.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 <details><summary>Choices (59)</summary>
 
@@ -244,7 +244,7 @@ string
 
 The city where the person died.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `dod_state`
 
@@ -252,7 +252,7 @@ string
 
 The state where the person died.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 <details><summary>Choices (59)</summary>
 

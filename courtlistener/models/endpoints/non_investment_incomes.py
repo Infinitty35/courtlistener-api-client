@@ -9,7 +9,7 @@ from typing import Annotated, Any, ClassVar
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from courtlistener.models.endpoint import Endpoint
-from courtlistener.models.filters import Filter6, Filter8
+from courtlistener.models.filters import Filter2, Filter7
 from courtlistener.utils import (
     choice_validator,
     comma_separated_post_validator,
@@ -65,14 +65,14 @@ class NonInvestmentIncomesEndpoint(Endpoint):
         ),
     ]
     date_created: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The moment when the item was created.",
         ),
     ]
     date_modified: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The last moment when the item was modified. A value in year 1750 indicates the value is unknown",
@@ -86,21 +86,21 @@ class NonInvestmentIncomesEndpoint(Endpoint):
         ),
     ]
     date_raw: Annotated[
-        None | str | Filter6,
+        None | str | Filter2,
         Field(
             None,
             description="Date of non-investment income (ex. 2011).",
         ),
     ]
     source_type: Annotated[
-        None | str | Filter6,
+        None | str | Filter2,
         Field(
             None,
             description="Source and type of non-investment income for the judge (ex. Teaching a class at U. Miami).",
         ),
     ]
     income_amount: Annotated[
-        None | str | Filter6,
+        None | str | Filter2,
         Field(
             None,
             description="Amount earned by judge, often a number, but sometimes with explanatory text (e.g. \u0027Income at firm: $xyz\u0027).",

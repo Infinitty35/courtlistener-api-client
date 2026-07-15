@@ -10,11 +10,10 @@ class Filter3(BaseModel):
     """Filter3.
 
     Filters for fields with types: ['int']
-    and lookup types: ['gt', 'gte', 'lt', 'lte', 'range']
+    and lookup types: ['gt', 'gte', 'lt', 'lte']
     """
 
     gt: None | int = None
     gte: None | int = None
     lt: None | int = None
     lte: None | int = None
-    range: None | tuple[int, int] = None

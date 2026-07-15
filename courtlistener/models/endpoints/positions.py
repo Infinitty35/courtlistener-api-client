@@ -9,7 +9,7 @@ from typing import Annotated, Any, ClassVar
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from courtlistener.models.endpoint import Endpoint
-from courtlistener.models.filters import Filter4, Filter6, Filter7, Filter8
+from courtlistener.models.filters import Filter2, Filter6, Filter7
 from courtlistener.utils import (
     choice_validator,
     comma_separated_post_validator,
@@ -411,91 +411,91 @@ class PositionsEndpoint(Endpoint):
         ),
     ]
     job_title: Annotated[
-        None | str | Filter6,
+        None | str | Filter2,
         Field(
             None,
             description="If title isn\u0027t in position_type, a free-text position may be entered here.",
         ),
     ]
     date_created: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The moment when the item was created.",
         ),
     ]
     date_modified: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The last moment when the item was modified. A value in year 1750 indicates the value is unknown",
         ),
     ]
     date_nominated: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="The date recorded in the Senate Executive Journal when a federal judge was nominated for their position or the date a state judge nominated by the legislature. When a nomination is by primary election, this is the date of the election. When a nomination is from a merit commission, this is the date the nomination was announced.",
         ),
     ]
     date_elected: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="Judges are elected in most states. This is the date of theirfirst election. This field will be null if the judge was initially selected by nomination.",
         ),
     ]
     date_recess_appointment: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="If a judge was appointed while congress was in recess, this is the date of that appointment.",
         ),
     ]
     date_referred_to_judicial_committee: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="Federal judges are usually referred to the Judicial Committee before being nominated. This is the date of that referral.",
         ),
     ]
     date_judicial_committee_action: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="The date that the Judicial Committee took action on the referral.",
         ),
     ]
     date_hearing: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="After being nominated, a judge is usually subject to a hearing. This is the date of that hearing.",
         ),
     ]
     date_confirmation: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="After the hearing the senate will vote on judges. This is the date of that vote.",
         ),
     ]
     date_start: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="The date the position starts active duty.",
         ),
     ]
     date_retirement: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="The date when they become a senior judge by going into active retirement",
         ),
     ]
     date_termination: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="The last date of their employment. The compliment to date_start",
@@ -651,14 +651,14 @@ class PositionsEndpoint(Endpoint):
         BeforeValidator(choice_validator),
     ]
     location_city: Annotated[
-        None | str | Filter4,
+        None | str | Filter2,
         Field(
             None,
             description="If not a court or school, the city where person worked.",
         ),
     ]
     location_state: Annotated[
-        None | str | Filter4,
+        None | str | Filter2,
         Field(
             None,
             description="If not a court or school, the state where person worked.",

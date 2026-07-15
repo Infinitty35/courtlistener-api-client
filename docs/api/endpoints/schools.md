@@ -59,7 +59,7 @@ string
 
 The name of the school or alias
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `ein`
 

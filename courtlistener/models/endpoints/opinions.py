@@ -9,7 +9,7 @@ from typing import Annotated, Any, ClassVar
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from courtlistener.models.endpoint import Endpoint
-from courtlistener.models.filters import Filter8
+from courtlistener.models.filters import Filter7
 from courtlistener.utils import (
     choice_validator,
     comma_separated_post_validator,
@@ -69,6 +69,7 @@ class OpinionsEndpoint(Endpoint):
                         "display_name": "Html anon 2020",
                     },
                     {"value": "xml_harvard", "display_name": "Xml harvard"},
+                    {"value": "xml_scan", "display_name": "Xml scan"},
                     {
                         "value": "html_with_citations",
                         "display_name": "Html with citations",
@@ -97,14 +98,14 @@ class OpinionsEndpoint(Endpoint):
         ),
     ]
     date_modified: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The last moment when the item was modified. A value in year 1750 indicates the value is unknown",
         ),
     ]
     date_created: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The moment when the item was created.",

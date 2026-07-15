@@ -9,7 +9,7 @@ from typing import Annotated, ClassVar
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from courtlistener.models.endpoint import Endpoint
-from courtlistener.models.filters import Filter7, Filter8
+from courtlistener.models.filters import Filter6, Filter7
 from courtlistener.utils import (
     choice_validator,
     comma_separated_post_validator,
@@ -80,21 +80,21 @@ class RetentionEventsEndpoint(Endpoint):
         ),
     ]
     date_created: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The moment when the item was created.",
         ),
     ]
     date_modified: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The last moment when the item was modified. A value in year 1750 indicates the value is unknown",
         ),
     ]
     date_retention: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="The date of retention",

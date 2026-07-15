@@ -8,7 +8,7 @@ from typing import Annotated, ClassVar
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from courtlistener.models.endpoint import Endpoint
-from courtlistener.models.filters import Filter4
+from courtlistener.models.filters import Filter2
 from courtlistener.utils import (
     choice_validator,
     comma_separated_post_validator,
@@ -70,13 +70,13 @@ class AlertsEndpoint(Endpoint):
         ),
     ]
     name: Annotated[
-        None | str | Filter4,
+        None | str | Filter2,
         Field(
             None,
         ),
     ]
     query: Annotated[
-        None | str | Filter4,
+        None | str | Filter2,
         Field(
             None,
         ),

@@ -66,7 +66,7 @@ string
 
 Date of spousal income (ex. 2011).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `source_type`
 
@@ -74,7 +74,7 @@ string
 
 Source and type of income of judicial spouse (ex. Salary from Bank job).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `financial_disclosure`
 

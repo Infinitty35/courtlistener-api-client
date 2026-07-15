@@ -9,7 +9,7 @@ from typing import Annotated, ClassVar
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from courtlistener.models.endpoint import Endpoint
-from courtlistener.models.filters import Filter8
+from courtlistener.models.filters import Filter7
 from courtlistener.utils import (
     choice_validator,
     comma_separated_post_validator,
@@ -60,7 +60,7 @@ class SourcesEndpoint(Endpoint):
         ),
     ]
     date_modified: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The last moment when the item was modified. A value in year 1750 indicates the value is unknown",

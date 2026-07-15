@@ -9,12 +9,12 @@ from pydantic import BaseModel
 class Filter4(BaseModel):
     """Filter4.
 
-    Filters for fields with types: ['str']
-    and lookup types: ['endswith', 'iendswith', 'iexact', 'istartswith', 'startswith']
+    Filters for fields with types: ['int']
+    and lookup types: ['gt', 'gte', 'lt', 'lte', 'range']
     """
 
-    endswith: None | str = None
-    iendswith: None | str = None
-    iexact: None | str = None
-    istartswith: None | str = None
-    startswith: None | str = None
+    gt: None | int = None
+    gte: None | int = None
+    lt: None | int = None
+    lte: None | int = None
+    range: None | tuple[int, int] = None

@@ -9,7 +9,7 @@ from typing import Annotated, Any, ClassVar
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from courtlistener.models.endpoint import Endpoint
-from courtlistener.models.filters import Filter7, Filter8
+from courtlistener.models.filters import Filter6, Filter7
 from courtlistener.utils import (
     choice_validator,
     comma_separated_post_validator,
@@ -45,6 +45,10 @@ class ClustersEndpoint(Endpoint):
                     {"value": "docket", "display_name": "Docket"},
                     {"value": "sub_opinions", "display_name": "Sub opinions"},
                     {"value": "citations", "display_name": "Citations"},
+                    {
+                        "value": "cluster_redirections",
+                        "display_name": "Cluster redirections",
+                    },
                     {"value": "date_created", "display_name": "Date created"},
                     {
                         "value": "date_modified",
@@ -119,6 +123,14 @@ class ClustersEndpoint(Endpoint):
                         "value": "filepath_pdf_harvard",
                         "display_name": "Filepath pdf harvard",
                     },
+                    {
+                        "value": "filepath_xml_scan",
+                        "display_name": "Filepath xml scan",
+                    },
+                    {
+                        "value": "filepath_pdf_scan",
+                        "display_name": "Filepath pdf scan",
+                    },
                     {"value": "arguments", "display_name": "Arguments"},
                     {"value": "headmatter", "display_name": "Headmatter"},
                 ],
@@ -135,21 +147,21 @@ class ClustersEndpoint(Endpoint):
         ),
     ]
     date_created: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The moment when the item was created.",
         ),
     ]
     date_modified: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The last moment when the item was modified. A value in year 1750 indicates the value is unknown",
         ),
     ]
     date_filed: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="The date the cluster of opinions was filed by the court",
@@ -224,7 +236,7 @@ class ClustersEndpoint(Endpoint):
         BeforeValidator(choice_validator),
     ]
     date_blocked: Annotated[
-        None | date | Filter7,
+        None | date | Filter6,
         Field(
             None,
             description="The date that this opinion was blocked from indexing by search engines",
@@ -281,7 +293,7 @@ class ClustersEndpoint(Endpoint):
         None | str | list[str],
         Field(
             None,
-            description="the source of the cluster, one of: C (court website), R (public.resource.org), CR (court website merged with resource.org), L (lawbox), LC (lawbox merged with court), LR (lawbox merged with resource.org), LCR (lawbox merged with court and resource.org), M (manual input), A (internet archive), H (brad heath archive), Z (columbia archive), ZA (columbia merged with internet archive), ZD (columbia merged with direct court input), ZC (columbia merged with court), ZH (columbia merged with brad heath archive), ZLC (columbia merged with lawbox and court), ZLR (columbia merged with lawbox and resource.org), ZLCR (columbia merged with lawbox, court, and resource.org), ZR (columbia merged with resource.org), ZCR (columbia merged with court and resource.org), ZL (columbia merged with lawbox), ZM (columbia merged with manual input), ZQ (columbia merged with 2020 anonymous database), U (Harvard, Library Innovation Lab Case Law Access Project), CU (court website merged with Harvard), D (direct court input), Q (2020 anonymous database), QU (2020 anonymous database merged with Harvard), CU (court website merged with Harvard), CRU (court website merged with public.resource.org and Harvard), DU (direct court input merged with Harvard), LU (lawbox merged with Harvard), LCU (Lawbox merged with court website and Harvard), LRU (Lawbox merged with public.resource.org and with Harvard), MU (Manual input merged with Harvard), RU (public.resource.org merged with Harvard), ZU (columbia archive merged with Harvard), ZLU (columbia archive merged with Lawbox and Harvard), ZDU (columbia archive merged with direct court input and Harvard), ZLRU (columbia archive merged with lawbox, public.resource.org and Harvard), ZLCRU (columbia archive merged with lawbox, court website, public.resource.org and Harvard), ZCU (columbia archive merged with court website and Harvard), ZMU (columbia archive merged with manual input and Harvard), ZRU (columbia archive merged with public.resource.org and Harvard), ZLCU (columbia archive merged with lawbox, court website and Harvard), G (recap)",
+            description="the source of the cluster, one of: C (court website), R (public.resource.org), CR (court website merged with resource.org), L (lawbox), LC (lawbox merged with court), LR (lawbox merged with resource.org), M (manual input), A (internet archive), Z (columbia archive), ZC (columbia merged with court), ZL (columbia merged with lawbox), ZLC (columbia merged with lawbox and court), U (Harvard, Library Innovation Lab Case Law Access Project), CU (court website merged with Harvard), D (direct court input), Q (2020 anonymous database), CRU (court website merged with public.resource.org and Harvard), LU (lawbox merged with Harvard), LCU (Lawbox merged with court website and Harvard), LRU (Lawbox merged with public.resource.org and with Harvard), LCRU (Lawbox merged with court website, public.resource.org and Harvard), MU (Manual input merged with Harvard), RU (public.resource.org merged with Harvard), ZU (columbia archive merged with Harvard), ZLU (columbia archive merged with Lawbox and Harvard), ZCU (columbia archive merged with court website and Harvard), ZLCU (columbia archive merged with lawbox, court website and Harvard), G (recap), S (scanning project)",
             json_schema_extra={
                 "choices": [
                     {"value": "C", "display_name": "court website"},
@@ -299,61 +311,20 @@ class ClustersEndpoint(Endpoint):
                         "value": "LR",
                         "display_name": "lawbox merged with resource.org",
                     },
-                    {
-                        "value": "LCR",
-                        "display_name": "lawbox merged with court and resource.org",
-                    },
                     {"value": "M", "display_name": "manual input"},
                     {"value": "A", "display_name": "internet archive"},
-                    {"value": "H", "display_name": "brad heath archive"},
                     {"value": "Z", "display_name": "columbia archive"},
-                    {
-                        "value": "ZA",
-                        "display_name": "columbia merged with internet archive",
-                    },
-                    {
-                        "value": "ZD",
-                        "display_name": "columbia merged with direct court input",
-                    },
                     {
                         "value": "ZC",
                         "display_name": "columbia merged with court",
-                    },
-                    {
-                        "value": "ZH",
-                        "display_name": "columbia merged with brad heath archive",
-                    },
-                    {
-                        "value": "ZLC",
-                        "display_name": "columbia merged with lawbox and court",
-                    },
-                    {
-                        "value": "ZLR",
-                        "display_name": "columbia merged with lawbox and resource.org",
-                    },
-                    {
-                        "value": "ZLCR",
-                        "display_name": "columbia merged with lawbox, court, and resource.org",
-                    },
-                    {
-                        "value": "ZR",
-                        "display_name": "columbia merged with resource.org",
-                    },
-                    {
-                        "value": "ZCR",
-                        "display_name": "columbia merged with court and resource.org",
                     },
                     {
                         "value": "ZL",
                         "display_name": "columbia merged with lawbox",
                     },
                     {
-                        "value": "ZM",
-                        "display_name": "columbia merged with manual input",
-                    },
-                    {
-                        "value": "ZQ",
-                        "display_name": "columbia merged with 2020 anonymous database",
+                        "value": "ZLC",
+                        "display_name": "columbia merged with lawbox and court",
                     },
                     {
                         "value": "U",
@@ -366,16 +337,8 @@ class ClustersEndpoint(Endpoint):
                     {"value": "D", "display_name": "direct court input"},
                     {"value": "Q", "display_name": "2020 anonymous database"},
                     {
-                        "value": "QU",
-                        "display_name": "2020 anonymous database merged with Harvard",
-                    },
-                    {
                         "value": "CRU",
                         "display_name": "court website merged with public.resource.org and Harvard",
-                    },
-                    {
-                        "value": "DU",
-                        "display_name": "direct court input merged with Harvard",
                     },
                     {
                         "value": "LU",
@@ -388,6 +351,10 @@ class ClustersEndpoint(Endpoint):
                     {
                         "value": "LRU",
                         "display_name": "Lawbox merged with public.resource.org and with Harvard",
+                    },
+                    {
+                        "value": "LCRU",
+                        "display_name": "Lawbox merged with court website, public.resource.org and Harvard",
                     },
                     {
                         "value": "MU",
@@ -406,34 +373,15 @@ class ClustersEndpoint(Endpoint):
                         "display_name": "columbia archive merged with Lawbox and Harvard",
                     },
                     {
-                        "value": "ZDU",
-                        "display_name": "columbia archive merged with direct court input and Harvard",
-                    },
-                    {
-                        "value": "ZLRU",
-                        "display_name": "columbia archive merged with lawbox, public.resource.org and Harvard",
-                    },
-                    {
-                        "value": "ZLCRU",
-                        "display_name": "columbia archive merged with lawbox, court website, public.resource.org and Harvard",
-                    },
-                    {
                         "value": "ZCU",
                         "display_name": "columbia archive merged with court website and Harvard",
-                    },
-                    {
-                        "value": "ZMU",
-                        "display_name": "columbia archive merged with manual input and Harvard",
-                    },
-                    {
-                        "value": "ZRU",
-                        "display_name": "columbia archive merged with public.resource.org and Harvard",
                     },
                     {
                         "value": "ZLCU",
                         "display_name": "columbia archive merged with lawbox, court website and Harvard",
                     },
                     {"value": "G", "display_name": "recap"},
+                    {"value": "S", "display_name": "scanning project"},
                 ],
             },
         ),

@@ -67,7 +67,7 @@ string
 
 Detailed degree description, e.g. including major.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `degree_level`
 

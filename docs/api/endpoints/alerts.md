@@ -44,13 +44,13 @@ integer
 
 string
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `query`
 
 string
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `rate`
 

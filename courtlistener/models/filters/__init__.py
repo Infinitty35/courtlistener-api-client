@@ -12,7 +12,6 @@ from courtlistener.models.filters.filter4 import Filter4
 from courtlistener.models.filters.filter5 import Filter5
 from courtlistener.models.filters.filter6 import Filter6
 from courtlistener.models.filters.filter7 import Filter7
-from courtlistener.models.filters.filter8 import Filter8
 
 __all__ = [
     "Filter1",
@@ -22,7 +21,6 @@ __all__ = [
     "Filter5",
     "Filter6",
     "Filter7",
-    "Filter8",
 ]
 
 FILTERS: dict[str, type[BaseModel]] = {
@@ -33,5 +31,4 @@ FILTERS: dict[str, type[BaseModel]] = {
     "Filter5": Filter5,
     "Filter6": Filter6,
     "Filter7": Filter7,
-    "Filter8": Filter8,
 }

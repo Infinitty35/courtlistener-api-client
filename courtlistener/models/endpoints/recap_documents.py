@@ -9,7 +9,7 @@ from typing import Annotated, Any, ClassVar
 from pydantic import AfterValidator, BeforeValidator, Field
 
 from courtlistener.models.endpoint import Endpoint
-from courtlistener.models.filters import Filter2, Filter8
+from courtlistener.models.filters import Filter3, Filter7
 from courtlistener.utils import (
     choice_validator,
     comma_separated_post_validator,
@@ -102,21 +102,21 @@ class RecapDocumentsEndpoint(Endpoint):
         ),
     ]
     date_created: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The moment when the item was created.",
         ),
     ]
     date_modified: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="The last moment when the item was modified. A value in year 1750 indicates the value is unknown",
         ),
     ]
     date_upload: Annotated[
-        None | datetime | Filter8,
+        None | datetime | Filter7,
         Field(
             None,
             description="upload_date in RECAP. The date the file was uploaded to RECAP. This information is provided by RECAP.",
@@ -137,7 +137,7 @@ class RecapDocumentsEndpoint(Endpoint):
         BeforeValidator(choice_validator),
     ]
     document_number: Annotated[
-        None | str | Filter2,
+        None | str | Filter3,
         Field(
             None,
             description="If the file is a document, the number is the document_number in RECAP docket.",

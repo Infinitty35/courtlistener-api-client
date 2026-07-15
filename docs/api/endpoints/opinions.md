@@ -21,7 +21,7 @@ string | array of string
 
 Filter which fields are returned.
 
-<details><summary>Choices (29)</summary>
+<details><summary>Choices (30)</summary>
 
 | Value | Label |
 |---|---|
@@ -49,6 +49,7 @@ Filter which fields are returned.
 | `"html_columbia"` | Html columbia |
 | `"html_anon_2020"` | Html anon 2020 |
 | `"xml_harvard"` | Xml harvard |
+| `"xml_scan"` | Xml scan |
 | `"html_with_citations"` | Html with citations |
 | `"extracted_by_ocr"` | Extracted by ocr |
 | `"ordering_key"` | Ordering key |

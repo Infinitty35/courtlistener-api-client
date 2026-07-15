@@ -49,7 +49,7 @@ string
 
 The name of the tag
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `published`
 
