@@ -5,7 +5,7 @@
 **Search**
 
 - **Source:** `courtlistener/mcp/tools/search_tool.py`
-- **Estimated definition size:** ~3684 tokens (description ~78, input schema ~3538; cl100k_base)
+- **Estimated definition size:** ~3221 tokens (description ~78, input schema ~3075; cl100k_base)
 - **Parameters:** 46 (1 required)
 - **Raw input schema:** [`search.inputs.json`](./search.inputs.json)
 
@@ -87,15 +87,11 @@ This field has 470 valid choices. Examples: scotus (Supreme Court of the United 
 
 Use the `get_choices` tool with endpoint_id="search" and field_name="court" to see all choices.
 
-Non-standard schema keys: `search_types`
-
 ### `q`
 
 string | null · optional
 
 Valid when type in: ['o', 'r', 'rd', 'd', 'p', 'oa']
-
-Non-standard schema keys: `search_types`
 
 ### `semantic`
 
@@ -103,15 +99,11 @@ boolean | null · optional
 
 Valid when type in: ['o']
 
-Non-standard schema keys: `search_types`
-
 ### `available_only`
 
 boolean | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
-
-Non-standard schema keys: `search_types`
 
 ### `case_name`
 
@@ -119,15 +111,11 @@ string | null · optional
 
 Valid when type in: ['o', 'r', 'rd', 'd', 'oa']
 
-Non-standard schema keys: `search_types`
-
 ### `description`
 
 string | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
-
-Non-standard schema keys: `search_types`
 
 ### `docket_number`
 
@@ -135,15 +123,11 @@ string | null · optional
 
 Valid when type in: ['o', 'r', 'rd', 'd', 'oa']
 
-Non-standard schema keys: `search_types`
-
 ### `nature_of_suit`
 
 string | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
-
-Non-standard schema keys: `search_types`
 
 ### `cause`
 
@@ -151,15 +135,11 @@ string | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
 
-Non-standard schema keys: `search_types`
-
 ### `filed_before`
 
 string | string (date) | null · optional
 
 Valid when type in: ['o', 'r', 'rd', 'd']
-
-Non-standard schema keys: `search_types`
 
 ### `filed_after`
 
@@ -167,15 +147,11 @@ string | string (date) | null · optional
 
 Valid when type in: ['o', 'r', 'rd', 'd']
 
-Non-standard schema keys: `search_types`
-
 ### `entry_date_filed_before`
 
 string | string (date) | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
-
-Non-standard schema keys: `search_types`
 
 ### `entry_date_filed_after`
 
@@ -183,15 +159,11 @@ string | string (date) | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
 
-Non-standard schema keys: `search_types`
-
 ### `document_number`
 
 integer | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
-
-Non-standard schema keys: `search_types`
 
 ### `attachment_number`
 
@@ -199,15 +171,11 @@ integer | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
 
-Non-standard schema keys: `search_types`
-
 ### `assigned_to`
 
 string | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
-
-Non-standard schema keys: `search_types`
 
 ### `referred_to`
 
@@ -215,15 +183,11 @@ string | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
 
-Non-standard schema keys: `search_types`
-
 ### `party_name`
 
 string | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
-
-Non-standard schema keys: `search_types`
 
 ### `atty_name`
 
@@ -231,15 +195,11 @@ string | null · optional
 
 Valid when type in: ['r', 'rd', 'd']
 
-Non-standard schema keys: `search_types`
-
 ### `judge`
 
 string | null · optional
 
 Valid when type in: ['o', 'oa']
-
-Non-standard schema keys: `search_types`
 
 ### `citation`
 
@@ -247,15 +207,11 @@ string | null · optional
 
 Valid when type in: ['o']
 
-Non-standard schema keys: `search_types`
-
 ### `neutral_cite`
 
 string | null · optional
 
 Valid when type in: ['o']
-
-Non-standard schema keys: `search_types`
 
 ### `stat_Published`
 
@@ -263,15 +219,11 @@ boolean | null · optional
 
 Valid when type in: ['o']
 
-Non-standard schema keys: `search_types`
-
 ### `stat_Unpublished`
 
 boolean | null · optional
 
 Valid when type in: ['o']
-
-Non-standard schema keys: `search_types`
 
 ### `stat_Errata`
 
@@ -279,15 +231,11 @@ boolean | null · optional
 
 Valid when type in: ['o']
 
-Non-standard schema keys: `search_types`
-
 ### `stat_Separate`
 
 boolean | null · optional
 
 Valid when type in: ['o']
-
-Non-standard schema keys: `search_types`
 
 ### `stat_In-chambers`
 
@@ -295,15 +243,11 @@ boolean | null · optional
 
 Valid when type in: ['o']
 
-Non-standard schema keys: `search_types`
-
 ### `stat_Relating-to`
 
 boolean | null · optional
 
 Valid when type in: ['o']
-
-Non-standard schema keys: `search_types`
 
 ### `stat_Unknown`
 
@@ -311,15 +255,11 @@ boolean | null · optional
 
 Valid when type in: ['o']
 
-Non-standard schema keys: `search_types`
-
 ### `cited_gt`
 
 integer | null · optional
 
 Valid when type in: ['o']
-
-Non-standard schema keys: `search_types`
 
 ### `cited_lt`
 
@@ -327,15 +267,11 @@ integer | null · optional
 
 Valid when type in: ['o']
 
-Non-standard schema keys: `search_types`
-
 ### `name`
 
 string | null · optional
 
 Valid when type in: ['p']
-
-Non-standard schema keys: `search_types`
 
 ### `born_before`
 
@@ -343,23 +279,17 @@ string | string (date) | null · optional
 
 Valid when type in: ['p']
 
-Non-standard schema keys: `search_types`
-
 ### `born_after`
 
 string | string (date) | null · optional
 
 Valid when type in: ['p']
 
-Non-standard schema keys: `search_types`
-
 ### `dob_city`
 
 string | null · optional
 
 Valid when type in: ['p']
-
-Non-standard schema keys: `search_types`
 
 ### `dob_state`
 
@@ -371,23 +301,17 @@ This field has 59 valid choices. Examples: AL (Alabama), AK (Alaska), AS (Americ
 
 Use the `get_choices` tool with endpoint_id="search" and field_name="dob_state" to see all choices.
 
-Non-standard schema keys: `search_types`
-
 ### `school`
 
 string | null · optional
 
 Valid when type in: ['p']
 
-Non-standard schema keys: `search_types`
-
 ### `appointer`
 
 string | null · optional
 
 Valid when type in: ['p']
-
-Non-standard schema keys: `search_types`
 
 ### `selection_method`
 
@@ -429,8 +353,6 @@ Valid choices:
   }
 ]
 ```
-
-Non-standard schema keys: `search_types`
 
 ### `political_affiliation`
 
@@ -485,23 +407,17 @@ Valid choices:
 ]
 ```
 
-Non-standard schema keys: `search_types`
-
 ### `argued_before`
 
 string | string (date) | null · optional
 
 Valid when type in: ['oa']
 
-Non-standard schema keys: `search_types`
-
 ### `argued_after`
 
 string | string (date) | null · optional
 
 Valid when type in: ['oa']
-
-Non-standard schema keys: `search_types`
 
 ### `order_by`
 
@@ -567,9 +483,3 @@ Valid choices:
   }
 ]
 ```
-
-Non-standard schema keys: `search_types`
-
-## Schema warnings
-
-The input schema contains non-standard JSON Schema keys, which strict clients may reject: `search_types`
