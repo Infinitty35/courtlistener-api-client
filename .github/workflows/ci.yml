@@ -16,8 +16,8 @@ jobs:
         with:
           changelog: CHANGES.md
 
-  lint:
-    name: Lint
+  pre-commit:
+    name: Pre-commit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
