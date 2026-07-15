@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "endpoint_id": {
+      "type": "string",
+      "description": "Endpoint ID to call (see `get_endpoint_schema` tool for valid endpoint IDs)"
+    },
+    "query": {
+      "type": "object",
+      "description": "Should match the endpoint schema returned by the `get_endpoint_schema` tool.",
+      "additionalProperties": true
+    },
+    "num_results": {
+      "type": "integer",
+      "description": "Number of results to return (1-100). Defaults to 20.",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 20
+    }
+  },
+  "required": [
+    "endpoint_id"
+  ]
+}

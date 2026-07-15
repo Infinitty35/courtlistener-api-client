@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "endpoint_id": {
+      "type": "string",
+      "description": "Valid endpoint IDs:\n\tdockets\n\tbankruptcy-information\n\toriginating-court-information\n\tdocket-entries\n\trecap-documents\n\tcourts\n\taudio\n\tclusters\n\topinions\n\topinions-cited\n\ttag\n\tpeople\n\tpositions\n\tretention-events\n\teducations\n\tschools\n\tpolitical-affiliations\n\tsources\n\taba-ratings\n\tparties\n\tattorneys\n\trecap-fetch\n\trecap-query\n\tfjc-integrated-database\n\ttags\n\tdocket-tags\n\tprayers\n\tincrement-event\n\tvisualizations/json\n\tvisualizations\n\tagreements\n\tdebts\n\tfinancial-disclosures\n\tgifts\n\tinvestments\n\tnon-investment-incomes\n\tdisclosure-positions\n\treimbursements\n\tspouse-incomes\n\talerts\n\tdocket-alerts"
+    }
+  },
+  "required": [
+    "endpoint_id"
+  ]
+}

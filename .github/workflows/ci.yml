@@ -9,7 +9,7 @@ on:
 jobs:
   changelog:
     name: Check Changelog
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
     runs-on: ubuntu-latest
     steps:
       - uses: tarides/changelog-check-action@v3
@@ -48,6 +48,38 @@ jobs:
 
       - name: Run mypy
         run: uv run mypy
+
+  docs:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --extra dev --extra mcp
+
+      - name: Regenerate docs
+        run: |
+          uv run python scripts/update_tool_docs.py
+          uv run python scripts/update_endpoint_docs.py
+
+      - name: Check docs are up to date
+        run: |
+          git add -A docs
+          if ! git diff --cached --quiet -- docs; then
+            git --no-pager diff --cached --stat -- docs
+            echo "::error::Generated docs are stale. Run 'uv run python scripts/update_tool_docs.py' and 'uv run python scripts/update_endpoint_docs.py', then commit the changes."
+            exit 1
+          fi
 
   tests:
     name: Tests

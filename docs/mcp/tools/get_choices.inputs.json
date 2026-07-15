@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "endpoint_id": {
+      "type": "string",
+      "description": "The endpoint ID (e.g. 'courts', 'search', 'dockets')."
+    },
+    "field_name": {
+      "type": "string",
+      "description": "The field name to get choices for."
+    }
+  },
+  "required": [
+    "endpoint_id",
+    "field_name"
+  ]
+}
