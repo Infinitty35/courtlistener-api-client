@@ -7,6 +7,7 @@ The following changes are not yet released, but are code complete:
 Features:
 - Integrate Sentry error reporting in the HTTP MCP server via `sentry-sdk`'s `MCPIntegration`. Configured by the optional `SENTRY_DSN` env var; leaving it unset keeps the SDK in no-op mode so local/dev runs are unaffected.
 - Add `search_document` tool for searching for snippets within one or more court opinions or RECAP documents.
+- Add generated documentation for API endpoints and MCP tools.
 
 Changes:
 - Add fallback handling for HTTP errors in MCP tool handler middleware.

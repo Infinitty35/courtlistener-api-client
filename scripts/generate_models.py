@@ -1,17 +1,20 @@
+import argparse
 import ast
 import json
+import subprocess
 from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
+from utils import BASE_DIR, DOCS_DIR
 
 from courtlistener import CourtListener
 
-BASE_DIR = Path(__file__).parents[1]
 TEMPLATES_DIR = BASE_DIR / "templates"
 ENDPOINTS_DIR = BASE_DIR / "courtlistener" / "models" / "endpoints"
 FILTERS_DIR = BASE_DIR / "courtlistener" / "models" / "filters"
+HTTP_OPTIONS_PATH = DOCS_DIR / "api" / "http_options.json"
 
 RELATED_ENDPOINT_MAP = {
     "opinion-clusters": "clusters",
@@ -656,15 +659,14 @@ def get_types_and_validators(
     return python_types, validators
 
 
-def get_endpoint_data(cache_path: str | Path | None = None) -> dict[str, Any]:
+def get_endpoint_data(use_cache: bool = True) -> dict[str, Any]:
     # Load options from cache or API
-    cache_path = Path(cache_path) if cache_path is not None else None
-    if cache_path is not None and cache_path.exists():
-        options = json.loads(cache_path.read_text())
+    if use_cache and HTTP_OPTIONS_PATH.exists():
+        options = json.loads(HTTP_OPTIONS_PATH.read_text())
     else:
         options = get_options()
-        if cache_path is not None:
-            cache_path.write_text(json.dumps(options, indent=2))
+        HTTP_OPTIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        HTTP_OPTIONS_PATH.write_text(json.dumps(options, indent=2) + "\n")
 
     # Add custom endpoints
     options = {**options, **load_search_options()}
@@ -809,7 +811,20 @@ def get_endpoint_data(cache_path: str | Path | None = None) -> dict[str, Any]:
     }
 
 
-if __name__ == "__main__":
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Generate endpoint and filter models from the API."
+    )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help=(
+            "Fetch fresh HTTP OPTIONS from the API instead of loading "
+            f"the cached dump at {HTTP_OPTIONS_PATH.relative_to(BASE_DIR)}."
+        ),
+    )
+    args = parser.parse_args()
+
     load_dotenv()
 
     env = Environment(
@@ -818,7 +833,7 @@ if __name__ == "__main__":
         lstrip_blocks=True,
     )
 
-    data = get_endpoint_data(BASE_DIR / "cached_options.json")
+    data = get_endpoint_data(use_cache=not args.no_cache)
 
     # Generate Filters Module
     FILTERS_DIR.mkdir(parents=True, exist_ok=True)
@@ -847,3 +862,20 @@ if __name__ == "__main__":
             endpoints=data["endpoints"].values(),
         )
     )
+
+    generated = [
+        str(path)
+        for directory in (FILTERS_DIR, ENDPOINTS_DIR)
+        for path in sorted(directory.glob("*.py"))
+    ]
+    subprocess.run(
+        ["pre-commit", "run", "--files", *generated],
+        cwd=BASE_DIR,
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+if __name__ == "__main__":
+    main()
