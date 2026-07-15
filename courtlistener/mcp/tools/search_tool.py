@@ -3,10 +3,12 @@ from typing import Any
 from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
-from courtlistener.mcp.tools.mcp_tool import MCPTool
-from courtlistener.mcp.tools.utils import (
+from courtlistener.mcp.settings import (
     DEFAULT_NUM_RESULTS,
     MAX_NUM_RESULTS,
+)
+from courtlistener.mcp.tools.mcp_tool import MCPTool
+from courtlistener.mcp.tools.utils import (
     collect_results,
     filter_results_by_fields,
     prepare_count,

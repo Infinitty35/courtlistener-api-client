@@ -1,16 +1,17 @@
 from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
-from courtlistener.mcp.tools.mcp_tool import MCPTool
-from courtlistener.mcp.tools.utils import (
+from courtlistener.mcp.session import get_session
+from courtlistener.mcp.settings import (
     DEFAULT_NUM_RESULTS,
     MAX_NUM_RESULTS,
+)
+from courtlistener.mcp.tools.mcp_tool import MCPTool
+from courtlistener.mcp.tools.utils import (
     collect_results,
     filter_results_by_fields,
-    get_session_query,
     has_more_results,
     prepare_has_more_str,
-    store_session_query,
 )
 from courtlistener.resource import ResourceIterator
 
@@ -60,7 +61,7 @@ class GetMoreResultsTool(MCPTool):
         num_results = arguments.get("num_results", DEFAULT_NUM_RESULTS)
 
         with self.get_client() as client:
-            query = await get_session_query(query_id, client)
+            query = await get_session().get_query(query_id, client)
             if query is None:
                 raise ValueError(
                     f"Query ID {query_id!r} not found. The session may have "
@@ -78,7 +79,7 @@ class GetMoreResultsTool(MCPTool):
             fields = query.get("fields")
             if fields is not None:
                 updated_data["fields"] = fields
-            await store_session_query(query_id, updated_data, client)
+            await get_session().store_query(query_id, updated_data, client)
 
             filtered_results, _ = filter_results_by_fields(results, fields)
 

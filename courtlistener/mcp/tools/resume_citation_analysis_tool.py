@@ -6,6 +6,7 @@ from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
+from courtlistener.mcp.session import get_session
 from courtlistener.mcp.tools.citation_utils import (
     MAX_CITATIONS_PER_REQUEST,
     build_compact_string,
@@ -14,10 +15,6 @@ from courtlistener.mcp.tools.citation_utils import (
     process_api_results,
 )
 from courtlistener.mcp.tools.mcp_tool import MCPTool
-from courtlistener.mcp.tools.utils import (
-    get_session_citation_analysis,
-    store_session_citation_analysis,
-)
 
 
 class ResumeCitationAnalysisTool(MCPTool):
@@ -67,7 +64,7 @@ class ResumeCitationAnalysisTool(MCPTool):
         job_id = arguments["job_id"]
         wait = bool(arguments.get("wait", False))
         with self.get_client() as client:
-            job = await get_session_citation_analysis(job_id, client)
+            job = await get_session().get_citation_analysis(job_id, client)
             if job is None:
                 raise ValueError(
                     f"Job ID {job_id!r} not found. The session may have expired."
@@ -102,6 +99,6 @@ class ResumeCitationAnalysisTool(MCPTool):
             )
             newly_verified = set(job["verified"].keys()) - previously_verified
 
-            await store_session_citation_analysis(job_id, job, client)
+            await get_session().store_citation_analysis(job_id, job, client)
 
             return format_resume(job_id, job, newly_verified)
