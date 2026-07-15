@@ -863,6 +863,19 @@ def main() -> None:
         )
     )
 
+    expected_files = {
+        FILTERS_DIR / (filter["class_name"].lower() + ".py")
+        for filter in data["filters"].values()
+    } | {
+        ENDPOINTS_DIR / (endpoint["attr_name"] + ".py")
+        for endpoint in data["endpoints"].values()
+    }
+    for directory in (FILTERS_DIR, ENDPOINTS_DIR):
+        for path in directory.glob("*.py"):
+            if path.name != "__init__.py" and path not in expected_files:
+                path.unlink()
+                print(f"Removed stale {path.relative_to(BASE_DIR)}")
+
     generated = [
         str(path)
         for directory in (FILTERS_DIR, ENDPOINTS_DIR)
