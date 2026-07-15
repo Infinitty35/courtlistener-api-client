@@ -68,6 +68,14 @@ courtlistener-mcp = "courtlistener.mcp.server:main"
 [tool.setuptools.packages.find]
 include = ["courtlistener*"]
 
+[tool.mypy]
+files = ["courtlistener"]
+python_version = "3.10"
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unused_configs = true
+
 [tool.ruff]
 line-length = 79
 lint.extend-safe-fixes = [
