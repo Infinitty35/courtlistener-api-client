@@ -1,5 +1,4 @@
 import base64
-import os
 
 from fastmcp import FastMCP
 from fastmcp.server.auth.auth import (
@@ -14,53 +13,23 @@ from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import (
     FileResponse,
-    HTMLResponse,
     JSONResponse,
     PlainTextResponse,
 )
 from starlette.routing import Route
 
+from courtlistener.mcp import settings
 from courtlistener.mcp.auth import UserInfoTokenVerifier
 from courtlistener.mcp.middleware import ToolHandlerMiddleware
 from courtlistener.mcp.prompts import GLOBAL_INSTRUCTIONS
-from courtlistener.mcp.tools.utils import (
+from courtlistener.mcp.settings import (
     BASE_DIR,
     GIT_SHA,
     MCP_BASE_URL,
     OAUTH_ISSUER,
+    OPENAI_APPS_CHALLENGE_TOKEN,
     REDIS_URL,
 )
-
-ICON_CACHE_HEADERS = {"Cache-Control": "public, max-age=86400"}
-
-OPENAI_APPS_CHALLENGE_TOKEN = "oR-QatCh96AHxvH1yYTS7_oP4ByrYVSuoCmAifKJyVg"
-
-INDEX_HTML = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CourtListener MCP Server</title>
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="google-site-verification" content="C8dEEUUkQm1uhzt8FLvr1mAKcuEOkMiTi5a0nFgs5Qw" />
-<meta name="description" content="MCP (Model Context Protocol) server for the CourtListener legal research API.">
-<style>
-body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 4rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
-a { color: #b53c2c; }
-code { background: #f4f4f4; padding: 0.1em 0.3em; border-radius: 3px; }
-</style>
-</head>
-<body>
-<h1>CourtListener MCP Server</h1>
-<p>This is the HTTP endpoint for the CourtListener Model Context Protocol server,
-which exposes the <a href="https://courtlistener.com">CourtListener</a> legal
-research API to MCP-compatible clients.</p>
-<p>See the <a href="https://wiki.free.law/c/courtlistener/help/api/mcp">MCP documentation</a> on the Free Law Wiki for setup instructions.</p>
-</body>
-</html>
-"""
 
 
 def create_mcp_server(**kwargs):
@@ -163,7 +132,7 @@ def create_mcp_server(**kwargs):
 
 def build_auth() -> AuthProvider | None:
     """Return an ``AuthProvider`` when OAuth is configured, else ``None``."""
-    if os.getenv("MCP_REQUIRE_OAUTH", "true").lower() != "true":
+    if not settings.MCP_REQUIRE_OAUTH:
         return None
     return RemoteAuthProvider(
         token_verifier=UserInfoTokenVerifier(base_url=MCP_BASE_URL),

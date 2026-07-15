@@ -1,14 +1,13 @@
-import os
-
 import sentry_sdk
 from sentry_sdk.integrations.mcp import MCPIntegration
 
 from courtlistener.mcp.server import create_http_app
+from courtlistener.mcp.settings import SENTRY_DSN, SENTRY_TRACES_SAMPLE_RATE
 
 sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN") or None,
+    dsn=SENTRY_DSN,
     integrations=[MCPIntegration()],
-    traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE") or 0.02),
+    traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
 )
 
 app = create_http_app()
