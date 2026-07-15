@@ -84,7 +84,7 @@ string
 
 Raw content of addendum with whitespace preserved.
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `has_been_extracted`
 

@@ -79,7 +79,7 @@ string
 
 Name of investment (ex. APPL common stock).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `gross_value_code`
 
@@ -132,7 +132,7 @@ string
 
 Transaction of investment during reporting period (ex. Buy, Sold)
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `transaction_value_code`
 

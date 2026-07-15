@@ -66,7 +66,7 @@ string
 
 Parties and terms of agreement (ex. Board Member NY Ballet)
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `date_raw`
 
@@ -74,7 +74,7 @@ string
 
 Date of judicial agreement.
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `financial_disclosure`
 

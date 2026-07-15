@@ -196,7 +196,7 @@ class TestSearchAlertsIntegration:
         try:
             alert = client.alerts.create(
                 name="SDK Test Alert",
-                query="q=test",
+                query='q="sdk create alert integration test"',
                 rate="off",
             )
             assert isinstance(alert, dict)
@@ -249,7 +249,7 @@ class TestSearchAlertsIntegration:
         try:
             alert = client.alerts.create(
                 name="SDK List Test",
-                query="q=list",
+                query='q="sdk list alerts integration test"',
                 rate="off",
             )
             results = client.alerts.list()
@@ -263,7 +263,7 @@ class TestSearchAlertsIntegration:
         try:
             alert = client.alerts.create(
                 name="SDK Dict Query Test",
-                query={"q": "test", "type": "o"},
+                query={"q": '"sdk dict query integration test"', "type": "o"},
                 rate="off",
             )
             assert isinstance(alert, dict)
@@ -283,6 +283,27 @@ class TestDocketAlertsIntegration:
     """
 
     DOCKET_ID = 68571705
+
+    @pytest.fixture(autouse=True)
+    def clean_docket_alerts(self, client):
+        """Delete any alert for DOCKET_ID before and after each test.
+
+        The docket+user pair is unique server-side, so an alert left
+        behind by an interrupted run makes every later ``create`` 400
+        until someone cleans it up manually.
+        """
+
+        def cleanup():
+            alert_ids = [
+                alert["id"]
+                for alert in client.docket_alerts.list(docket=self.DOCKET_ID)
+            ]
+            for alert_id in alert_ids:
+                client.docket_alerts.delete(alert_id)
+
+        cleanup()
+        yield
+        cleanup()
 
     def test_create_docket_alert(self, client):
         alert = None

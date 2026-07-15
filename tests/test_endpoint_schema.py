@@ -79,7 +79,7 @@ class TestEndpointSchemaOutput:
         full_name = schema["properties"]["full_name"]
         branches = full_name["anyOf"]
         filter_branch = next(b for b in branches if b.get("type") == "object")
-        assert "contains" in filter_branch["properties"]
+        assert "iexact" in filter_branch["properties"]
         assert "startswith" in filter_branch["properties"]
 
     def test_schema_noise_is_stripped(self):

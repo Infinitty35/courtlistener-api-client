@@ -67,7 +67,7 @@ string
 
 Date of non-investment income (ex. 2011).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `source_type`
 
@@ -75,7 +75,7 @@ string
 
 Source and type of non-investment income for the judge (ex. Teaching a class at U. Miami).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `income_amount`
 
@@ -83,7 +83,7 @@ string
 
 Amount earned by judge, often a number, but sometimes with explanatory text (e.g. 'Income at firm: $xyz').
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `financial_disclosure`
 

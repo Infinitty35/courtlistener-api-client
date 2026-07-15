@@ -152,7 +152,7 @@ string
 
 The nature of suit code from PACER.
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `pacer_case_id`
 
@@ -166,7 +166,7 @@ integer | array of integer
 
 contains the source of the Docket.
 
-<details><summary>Choices (127)</summary>
+<details><summary>Choices (255)</summary>
 
 | Value | Label |
 |---|---|
@@ -297,6 +297,134 @@ contains the source of the Docket.
 | `125` | RECAP, Columbia, IDB, Harvard, Direct court input, and 2020 anonymous database |
 | `126` | Scraper, Columbia, IDB, Harvard, Direct court input, and 2020 anonymous database |
 | `127` | RECAP, Scraper, Columbia, IDB, Harvard, Direct court input, and 2020 anonymous database |
+| `128` | Scanning project |
+| `129` | RECAP and scanning project |
+| `130` | Scraper and scanning project |
+| `131` | RECAP, scraper, and scanning project |
+| `132` | Columbia and scanning project |
+| `133` | Columbia, RECAP, and scanning project |
+| `134` | Columbia, scraper, and scanning project |
+| `135` | Columbia, RECAP, scraper, and scanning project |
+| `136` | IDB and scanning project |
+| `137` | RECAP, IDB, and scanning project |
+| `138` | Scraper, IDB, and scanning project |
+| `139` | RECAP, scraper, IDB, and scanning project |
+| `140` | Columbia, IDB, and scanning project |
+| `141` | Columbia, RECAP, IDB, and scanning project |
+| `142` | Columbia, scraper, IDB, and scanning project |
+| `143` | Columbia, RECAP, scraper, IDB, and scanning project |
+| `144` | Harvard and scanning project |
+| `145` | Harvard, RECAP, and scanning project |
+| `146` | Scraper, Harvard, and scanning project |
+| `147` | RECAP, scraper, Harvard, and scanning project |
+| `148` | Harvard, Columbia, and scanning project |
+| `149` | Columbia, RECAP, Harvard, and scanning project |
+| `150` | Columbia, scraper, Harvard, and scanning project |
+| `151` | Columbia, RECAP, scraper, Harvard, and scanning project |
+| `152` | IDB, Harvard, and scanning project |
+| `153` | RECAP, IDB, Harvard, and scanning project |
+| `154` | Scraper, IDB, Harvard, and scanning project |
+| `155` | RECAP, scraper, IDB, Harvard, and scanning project |
+| `156` | Columbia, IDB, Harvard, and scanning project |
+| `157` | Columbia, RECAP, IDB, Harvard, and scanning project |
+| `158` | Columbia, scraper, IDB, Harvard, and scanning project |
+| `159` | Columbia, RECAP, scraper, IDB, Harvard, and scanning project |
+| `160` | Direct court input and scanning project |
+| `161` | RECAP, direct court input, and scanning project |
+| `162` | Scraper, direct court input, and scanning project |
+| `163` | RECAP, scraper, direct court input, and scanning project |
+| `164` | Columbia, direct court input, and scanning project |
+| `165` | RECAP, Columbia, direct court input, and scanning project |
+| `166` | Scraper, Columbia, direct court input, and scanning project |
+| `167` | RECAP, scraper, Columbia, direct court input, and scanning project |
+| `168` | IDB, direct court input, and scanning project |
+| `169` | RECAP, IDB, direct court input, and scanning project |
+| `170` | Scraper, IDB, direct court input, and scanning project |
+| `171` | RECAP, scraper, IDB, direct court input, and scanning project |
+| `172` | Columbia, IDB, direct court input, and scanning project |
+| `173` | RECAP, Columbia, IDB, direct court input, and scanning project |
+| `174` | Scraper, Columbia, IDB, direct court input, and scanning project |
+| `175` | RECAP, scraper, Columbia, IDB, direct court input, and scanning project |
+| `176` | Direct court input, Harvard, and scanning project |
+| `177` | RECAP, Harvard, direct court input, and scanning project |
+| `178` | Scraper, Harvard, direct court input, and scanning project |
+| `179` | RECAP, scraper, Harvard, direct court input, and scanning project |
+| `180` | Columbia, Harvard, direct court input, and scanning project |
+| `181` | RECAP, Columbia, Harvard, direct court input, and scanning project |
+| `182` | Scraper, Columbia, Harvard, direct court input, and scanning project |
+| `183` | RECAP, scraper, Columbia, Harvard, direct court input, and scanning project |
+| `184` | IDB, Harvard, direct court input, and scanning project |
+| `185` | RECAP, IDB, Harvard, direct court input, and scanning project |
+| `186` | Scraper, IDB, Harvard, direct court input, and scanning project |
+| `187` | RECAP, scraper, IDB, Harvard, direct court input, and scanning project |
+| `188` | Columbia, IDB, Harvard, direct court input, and scanning project |
+| `189` | RECAP, Columbia, IDB, Harvard, direct court input, and scanning project |
+| `190` | Scraper, Columbia, IDB, Harvard, direct court input, and scanning project |
+| `191` | RECAP, scraper, Columbia, IDB, Harvard, direct court input, and scanning project |
+| `192` | 2020 anonymous database and scanning project |
+| `193` | RECAP, 2020 anonymous database, and scanning project |
+| `194` | 2020 anonymous database, scraper, and scanning project |
+| `195` | RECAP, scraper, 2020 anonymous database, and scanning project |
+| `196` | Columbia, 2020 anonymous database, and scanning project |
+| `197` | RECAP, Columbia, 2020 anonymous database, and scanning project |
+| `198` | Scraper, Columbia, 2020 anonymous database, and scanning project |
+| `199` | RECAP, scraper, Columbia, 2020 anonymous database, and scanning project |
+| `200` | IDB, 2020 anonymous database, and scanning project |
+| `201` | RECAP, IDB, 2020 anonymous database, and scanning project |
+| `202` | Scraper, IDB, 2020 anonymous database, and scanning project |
+| `203` | RECAP, scraper, IDB, 2020 anonymous database, and scanning project |
+| `204` | Columbia, IDB, 2020 anonymous database, and scanning project |
+| `205` | RECAP, Columbia, IDB, 2020 anonymous database, and scanning project |
+| `206` | Scraper, Columbia, IDB, 2020 anonymous database, and scanning project |
+| `207` | RECAP, scraper, Columbia, IDB, 2020 anonymous database, and scanning project |
+| `208` | 2020 anonymous database, Harvard, and scanning project |
+| `209` | RECAP, Harvard, 2020 anonymous database, and scanning project |
+| `210` | 2020 anonymous database, scraper, Harvard, and scanning project |
+| `211` | RECAP, scraper, Harvard, 2020 anonymous database, and scanning project |
+| `212` | Columbia, Harvard, 2020 anonymous database, and scanning project |
+| `213` | RECAP, Columbia, Harvard, 2020 anonymous database, and scanning project |
+| `214` | Scraper, Columbia, Harvard, 2020 anonymous database, and scanning project |
+| `215` | RECAP, scraper, Columbia, Harvard, 2020 anonymous database, and scanning project |
+| `216` | IDB, Harvard, 2020 anonymous database, and scanning project |
+| `217` | RECAP, IDB, Harvard, 2020 anonymous database, and scanning project |
+| `218` | Scraper, IDB, Harvard, 2020 anonymous database, and scanning project |
+| `219` | RECAP, scraper, IDB, Harvard, 2020 anonymous database, and scanning project |
+| `220` | Columbia, IDB, Harvard, 2020 anonymous database, and scanning project |
+| `221` | RECAP, Columbia, IDB, Harvard, 2020 anonymous database, and scanning project |
+| `222` | Scraper, Columbia, IDB, Harvard, 2020 anonymous database, and scanning project |
+| `223` | RECAP, scraper, Columbia, IDB, Harvard, 2020 anonymous database, and scanning project |
+| `224` | Direct court input, 2020 anonymous database, and scanning project |
+| `225` | RECAP, direct court input, 2020 anonymous database, and scanning project |
+| `226` | Scraper, direct court input, 2020 anonymous database, and scanning project |
+| `227` | RECAP, scraper, direct court input, 2020 anonymous database, and scanning project |
+| `228` | Columbia, direct court input, 2020 anonymous database, and scanning project |
+| `229` | RECAP, Columbia, direct court input, 2020 anonymous database, and scanning project |
+| `230` | Scraper, Columbia, direct court input, 2020 anonymous database, and scanning project |
+| `231` | RECAP, scraper, Columbia, direct court input, 2020 anonymous database, and scanning project |
+| `232` | IDB, direct court input, 2020 anonymous database, and scanning project |
+| `233` | RECAP, IDB, direct court input, 2020 anonymous database, and scanning project |
+| `234` | Scraper, IDB, direct court input, 2020 anonymous database, and scanning project |
+| `235` | RECAP, scraper, IDB, direct court input, 2020 anonymous database, and scanning project |
+| `236` | Columbia, IDB, direct court input, 2020 anonymous database, and scanning project |
+| `237` | RECAP, Columbia, IDB, direct court input, 2020 anonymous database, and scanning project |
+| `238` | Scraper, Columbia, IDB, direct court input, 2020 anonymous database, and scanning project |
+| `239` | RECAP, scraper, Columbia, IDB, direct court input, 2020 anonymous database, and scanning project |
+| `240` | Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `241` | RECAP, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `242` | Scraper, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `243` | RECAP, scraper, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `244` | Columbia, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `245` | RECAP, Columbia, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `246` | Scraper, Columbia, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `247` | RECAP, scraper, Columbia, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `248` | IDB, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `249` | RECAP, IDB, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `250` | Scraper, IDB, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `251` | RECAP, scraper, IDB, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `252` | Columbia, IDB, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `253` | RECAP, Columbia, IDB, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `254` | Scraper, Columbia, IDB, Harvard, direct court input, 2020 anonymous database, and scanning project |
+| `255` | RECAP, scraper, Columbia, IDB, Harvard, direct court input, 2020 anonymous database, and scanning project |
 
 </details>
 

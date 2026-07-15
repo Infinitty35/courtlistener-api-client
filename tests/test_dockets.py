@@ -54,24 +54,24 @@ class TestDocketsList:
             assert docket["source"] == 1  # RECAP = 1
 
     def test_list_with_nature_of_suit_filter(self, client):
-        """String filter with 'contains' lookup."""
-        results = client.dockets.list(nature_of_suit={"contains": "Contract"})
+        """String filter with 'startswith' lookup."""
+        results = client.dockets.list(nature_of_suit={"startswith": "440"})
         assert isinstance(results.results, list)
         for docket in results.results:
-            assert "Contract" in docket["nature_of_suit"]
+            assert docket["nature_of_suit"].startswith("440")
 
     def test_list_with_date_range(self, client):
         """Date filter with both gte and lte."""
         results = client.dockets.list(
             date_filed={
-                "gte": "2023-01-01",
-                "lte": "2023-12-31",
+                "gte": "2026-01-01",
+                "lte": "2026-01-30",
             }
         )
         assert len(results.results) > 0
         for docket in results.results:
             filed = date.fromisoformat(docket["date_filed"])
-            assert date(2023, 1, 1) <= filed <= date(2023, 12, 31)
+            assert date(2026, 1, 1) <= filed <= date(2026, 1, 30)
 
     def test_list_with_fields_filter(self, client):
         """Date filter with both gte and lte."""

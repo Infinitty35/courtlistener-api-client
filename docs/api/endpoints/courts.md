@@ -107,7 +107,7 @@ string
 
 a short name of the court
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `full_name`
 
@@ -115,7 +115,7 @@ string
 
 the full name of the court
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `citation_string`
 
@@ -123,7 +123,7 @@ string
 
 the citation abbreviation for the court as dictated by Blue Book
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `dockets`
 

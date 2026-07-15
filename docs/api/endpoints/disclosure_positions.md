@@ -66,7 +66,7 @@ string
 
 Position title (ex. Trustee).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `organization_name`
 
@@ -74,7 +74,7 @@ string
 
 Name of organization or entity (ex. Trust #1).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `financial_disclosure`
 

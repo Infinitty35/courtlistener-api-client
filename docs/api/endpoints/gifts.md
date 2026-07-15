@@ -61,7 +61,7 @@ string
 
 Source of the judicial gift. (ex. Alta Ski Area).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `description`
 
@@ -69,7 +69,7 @@ string
 
 Description of the gift (ex. Season Pass).
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `value`
 
@@ -77,7 +77,7 @@ string
 
 Value of the judicial gift, (ex. $1,199.00)
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `redacted`
 

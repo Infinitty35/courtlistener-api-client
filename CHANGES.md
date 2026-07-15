@@ -17,6 +17,7 @@ Changes:
 - Make `search_document` tool always return a dict, even for multi-document searches.
 - Add `destructiveHint` to all MCP tool annotations.
 - Add OpenAI Apps domain-verification challenge token to MCP server.
+- Updated to reflect API changes in CourtListener (7/15/2026).
 
 Fixes:
 - Catch falsy `SENTRY_DSN` variable.

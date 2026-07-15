@@ -175,7 +175,7 @@ string
 
 If title isn't in position_type, a free-text position may be entered here.
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `date_created`
 
@@ -367,7 +367,7 @@ string
 
 If not a court or school, the city where person worked.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `location_state`
 
@@ -375,7 +375,7 @@ string
 
 If not a court or school, the state where person worked.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 <details><summary>Choices (59)</summary>
 

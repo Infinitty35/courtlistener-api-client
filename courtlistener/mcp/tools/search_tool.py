@@ -74,10 +74,11 @@ class SearchTool(MCPTool):
         for filter_name, filter in list(search_properties.items()):
             # Add the valid types to the description
             if filter_name != "type":
+                search_types = filter.pop("search_types", [])
                 filter["description"] = (
                     filter.get("description", "")
                     + "\n\n"
-                    + f"Valid when type in: {filter.get('search_types', [])}"
+                    + f"Valid when type in: {search_types}"
                 ).strip()
             updated_properties[filter_name] = prepare_filter(
                 filter,

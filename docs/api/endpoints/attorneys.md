@@ -62,7 +62,7 @@ string
 
 The name of the attorney.
 
-Lookups: `contains`, `endswith`, `icontains`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `docket`
 

@@ -172,7 +172,7 @@ string
 
 No description provided by FJC.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `section`
 
@@ -180,7 +180,7 @@ string
 
 No description provided by FJC.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `subsection`
 
@@ -188,7 +188,7 @@ string
 
 No description provided by FJC.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `arbitration_at_filing`
 
@@ -222,7 +222,7 @@ Choices (4):
 
 ### `class_action`
 
-boolean | array of boolean
+boolean
 
 Involves an allegation by the plaintiff that the complaint meets the prerequisites of a "Class Action" as provided in Rule 23 - F.R.CV.P.
 
@@ -232,7 +232,7 @@ string
 
 First listed plaintiff. This field appears to be cut off at 30 characters
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `defendant`
 
@@ -240,7 +240,7 @@ string
 
 First listed defendant. This field appears to be cut off at 30 characters.
 
-Lookups: `endswith`, `iendswith`, `iexact`, `istartswith`, `startswith`
+Lookups: `iexact`, `istartswith`, `startswith`
 
 ### `termination_class_action_status`
 
