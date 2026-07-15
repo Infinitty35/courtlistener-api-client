@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "properties": {
+    "endpoint_id": {
+      "type": "string",
+      "description": "Endpoint ID to get an item from"
+    },
+    "item_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        }
+      ],
+      "description": "The ID of the item to get."
+    },
+    "fields": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Filter which fields are returned."
+    }
+  },
+  "required": [
+    "endpoint_id",
+    "item_id"
+  ]
+}
