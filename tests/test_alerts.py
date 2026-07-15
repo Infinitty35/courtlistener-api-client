@@ -196,7 +196,7 @@ class TestSearchAlertsIntegration:
         try:
             alert = client.alerts.create(
                 name="SDK Test Alert",
-                query="q=test",
+                query='q="sdk create alert integration test"',
                 rate="off",
             )
             assert isinstance(alert, dict)
@@ -249,7 +249,7 @@ class TestSearchAlertsIntegration:
         try:
             alert = client.alerts.create(
                 name="SDK List Test",
-                query="q=list",
+                query='q="sdk list alerts integration test"',
                 rate="off",
             )
             results = client.alerts.list()
@@ -263,7 +263,7 @@ class TestSearchAlertsIntegration:
         try:
             alert = client.alerts.create(
                 name="SDK Dict Query Test",
-                query={"q": "test", "type": "o"},
+                query={"q": '"sdk dict query integration test"', "type": "o"},
                 rate="off",
             )
             assert isinstance(alert, dict)
