@@ -48,7 +48,7 @@ TOKEN_CACHE_TTL_SECONDS = int(os.getenv("MCP_TOKEN_CACHE_TTL", "600"))
 MCP_REQUIRE_OAUTH = os.getenv("MCP_REQUIRE_OAUTH", "true").lower() == "true"
 
 # Session-scoped state (query pagination, citation jobs) lives this long.
-SESSION_TTL_SECONDS = 3600 # 1 hour
+SESSION_TTL_SECONDS = 3600  # 1 hour
 
 # How long a cached document lives in the session store (shared across users).
 DOCUMENT_TTL_SECONDS = 86400  # 24 hours

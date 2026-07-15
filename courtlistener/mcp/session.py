@@ -105,7 +105,9 @@ class Session:
     async def get_document(self, doc_type: str, doc_id: int) -> str | None:
         return await self._get(f"mcp:doc:{doc_type}:{doc_id}")
 
-    async def store_document(self, doc_type: str, doc_id: int, text: str) -> None:
+    async def store_document(
+        self, doc_type: str, doc_id: int, text: str
+    ) -> None:
         # Not user-scoped so that fetched documents are shared across users.
         await self._set(
             f"mcp:doc:{doc_type}:{doc_id}", text, DOCUMENT_TTL_SECONDS
