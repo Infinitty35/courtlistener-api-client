@@ -8,6 +8,7 @@ from fastmcp.tools import ToolResult
 from mcp.types import TextContent
 
 from courtlistener.exceptions import CourtListenerAPIError
+from courtlistener.mcp.exceptions import SentryExemptToolError
 from courtlistener.mcp.session import get_session, json_default
 from courtlistener.mcp.tools import MCP_TOOLS
 
@@ -54,7 +55,8 @@ class ToolHandlerMiddleware(Middleware):
                     "Your session may have expired; retry to re-authenticate."
                 ) from exc
             elif exc.status_code == 429:
-                raise ToolError(
+                # Exempt: Routine API rate limit errors.
+                raise SentryExemptToolError(
                     f"Rate limit exceeded: {exc}. For higher rate limits, "
                     "you can upgrade your membership at https://donate.free.law/forms/membership"
                 ) from exc
