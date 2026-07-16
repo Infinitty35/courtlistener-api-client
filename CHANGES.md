@@ -9,6 +9,7 @@ Features:
 - Add `search_document` tool for searching for snippets within one or more court opinions or RECAP documents.
 - Add generated documentation for API endpoints and MCP tools.
 - Add mypy workflow, documentation check, and API check to CI.
+- Added in-memory session support for MCP server.
 
 Changes:
 - Add fallback handling for HTTP errors in MCP tool handler middleware.
