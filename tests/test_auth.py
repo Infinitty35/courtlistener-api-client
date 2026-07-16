@@ -181,9 +181,9 @@ class TestServerAuthWiring:
             import importlib
 
             import courtlistener.mcp.server as server_mod
-            import courtlistener.mcp.tools.utils as utils_mod
+            import courtlistener.mcp.settings as settings_mod
 
-            importlib.reload(utils_mod)
+            importlib.reload(settings_mod)
             importlib.reload(server_mod)
             auth = server_mod.build_auth()
             verifier_cls = server_mod.UserInfoTokenVerifier
@@ -258,25 +258,47 @@ class TestServerAuthWiring:
         verifier = UserInfoTokenVerifier(base_url="https://mcp.example.test")
         assert asyncio.run(verifier.verify_token("")) is None
 
-    def test_build_auth_accepts_true_case_insensitively(self):
-        """``MCP_REQUIRE_OAUTH=TRUE`` / ``True`` also enables OAuth."""
+    def test_build_auth_respects_require_oauth_setting(self):
+        """``build_auth`` reads ``settings.MCP_REQUIRE_OAUTH`` at call
+        time, so it can be patched like any other setting."""
         from courtlistener.mcp.server import build_auth
 
-        for value in ("true", "TRUE", "True"):
-            with patch.dict("os.environ", {"MCP_REQUIRE_OAUTH": value}):
-                assert build_auth() is not None, value
+        with patch("courtlistener.mcp.settings.MCP_REQUIRE_OAUTH", False):
+            assert build_auth() is None
+        with patch("courtlistener.mcp.settings.MCP_REQUIRE_OAUTH", True):
+            assert build_auth() is not None
 
-    def test_build_auth_ignores_other_truthy_values(self):
+    def test_require_oauth_parses_true_case_insensitively(self):
+        """``MCP_REQUIRE_OAUTH=TRUE`` / ``True`` also enables OAuth."""
+        import importlib
+
+        import courtlistener.mcp.settings as settings_mod
+
+        try:
+            for value in ("true", "TRUE", "True"):
+                with patch.dict("os.environ", {"MCP_REQUIRE_OAUTH": value}):
+                    importlib.reload(settings_mod)
+                    assert settings_mod.MCP_REQUIRE_OAUTH is True, value
+        finally:
+            importlib.reload(settings_mod)
+
+    def test_require_oauth_ignores_other_truthy_values(self):
         """Only the literal string ``true`` (any casing) enables OAuth.
 
         Prevents accidental activation from stray values like ``1`` or
         ``yes`` in deployment configs.
         """
-        from courtlistener.mcp.server import build_auth
+        import importlib
 
-        for value in ("1", "yes", "on", "True ", " true", "false", ""):
-            with patch.dict("os.environ", {"MCP_REQUIRE_OAUTH": value}):
-                assert build_auth() is None, value
+        import courtlistener.mcp.settings as settings_mod
+
+        try:
+            for value in ("1", "yes", "on", "True ", " true", "false", ""):
+                with patch.dict("os.environ", {"MCP_REQUIRE_OAUTH": value}):
+                    importlib.reload(settings_mod)
+                    assert settings_mod.MCP_REQUIRE_OAUTH is False, value
+        finally:
+            importlib.reload(settings_mod)
 
     def test_create_mcp_server_does_not_enable_auth_by_default(self):
         """Bare ``create_mcp_server`` should not wire in OAuth, even
@@ -304,13 +326,13 @@ class TestUserHash:
         change the hash because the claim is derived from the stable
         OIDC ``sub``.
         """
-        from courtlistener.mcp.tools.utils import user_hash
+        from courtlistener.mcp.session import user_hash
 
         client = CourtListener(access_token="any-token")
         fake_token = MagicMock()
         fake_token.claims = {"user_hash": "claim-derived-hash"}
         with patch(
-            "courtlistener.mcp.tools.utils.get_access_token",
+            "courtlistener.mcp.session.get_access_token",
             return_value=fake_token,
         ):
             assert user_hash(client) == "claim-derived-hash"
@@ -319,26 +341,26 @@ class TestUserHash:
         """Legacy / stdio path: no FastMCP context → HMAC the API token
         directly, matching pre-OAuth behavior.
         """
-        from courtlistener.mcp.tools.utils import hmac_hex, user_hash
+        from courtlistener.mcp.session import hmac_hex, user_hash
 
         client = CourtListener(api_token="legacy-token")
         with patch(
-            "courtlistener.mcp.tools.utils.get_access_token",
+            "courtlistener.mcp.session.get_access_token",
             side_effect=RuntimeError("no HTTP request"),
         ):
             assert user_hash(client) == hmac_hex("legacy-token")
 
     def test_raises_when_client_has_no_credential(self):
         """Defensive: a client with neither an access token nor an API
-        token should never reach the Redis layer."""
-        from courtlistener.mcp.tools.utils import user_hash
+        token should never reach the session store."""
+        from courtlistener.mcp.session import user_hash
 
         client = CourtListener.__new__(CourtListener)
         client.api_token = None
         client.access_token = None
         with (
             patch(
-                "courtlistener.mcp.tools.utils.get_access_token",
+                "courtlistener.mcp.session.get_access_token",
                 side_effect=RuntimeError("no HTTP request"),
             ),
             pytest.raises(ValueError, match="no credential"),
@@ -370,7 +392,9 @@ class TestHealthEndpoint:
             import importlib
 
             import courtlistener.mcp.server as server_mod
+            import courtlistener.mcp.settings as settings_mod
 
+            importlib.reload(settings_mod)
             importlib.reload(server_mod)
             mcp = server_mod.create_mcp_server(auth=server_mod.build_auth())
 
@@ -405,7 +429,9 @@ class TestOpenAIAppsChallenge:
             import importlib
 
             import courtlistener.mcp.server as server_mod
+            import courtlistener.mcp.settings as settings_mod
 
+            importlib.reload(settings_mod)
             importlib.reload(server_mod)
             mcp = server_mod.create_mcp_server(auth=server_mod.build_auth())
             token = server_mod.OPENAI_APPS_CHALLENGE_TOKEN

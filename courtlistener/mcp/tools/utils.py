@@ -1,77 +1,22 @@
-import hashlib
-import hmac
 import json
 import logging
-import os
 import uuid
-from datetime import date, datetime
 from itertools import islice
-from pathlib import Path
-from typing import Any
 
-import httpx
-import redis.asyncio as redis
 import tiktoken
-from fastmcp.server.dependencies import get_access_token
 
 from courtlistener import CourtListener
+from courtlistener.mcp.session import get_session
+from courtlistener.mcp.settings import DEFAULT_NUM_RESULTS
 from courtlistener.resource import ResourceIterator
 
 logger = logging.getLogger(__name__)
-
-BASE_DIR = Path(__file__).parents[2]
-
-DEFAULT_NUM_RESULTS = 20
-MAX_NUM_RESULTS = 100
-
-# Session-scoped keys live in Redis for this long before being evicted.
-SESSION_TTL_SECONDS = 3600
-
-# How long a token→user_hash mapping is cached.
-TOKEN_CACHE_TTL_SECONDS = int(os.getenv("MCP_TOKEN_CACHE_TTL", "600"))
-
-REDIS_URL = os.getenv("REDIS_URL")
-
-GIT_SHA = os.getenv("GIT_SHA", "unknown")
-
-MCP_BASE_URL = os.getenv("MCP_BASE_URL", "https://mcp.courtlistener.com")
-
-OAUTH_ISSUER = os.getenv(
-    "COURTLISTENER_OAUTH_ISSUER", "https://www.courtlistener.com"
-)
-
-OAUTH_USERINFO_URL = os.getenv(
-    "COURTLISTENER_OAUTH_USERINFO_URL",
-    f"{OAUTH_ISSUER.rstrip('/')}/o/userinfo/",
-)
-
-MCP_SECRET_KEY = os.getenv("MCP_SECRET_KEY")
-if not MCP_SECRET_KEY:
-    MCP_SECRET_KEY = "insecure-do-not-use-in-production"
-    logger.warning(
-        "MCP_SECRET_KEY is not set; falling back to an insecure default. "
-        "Set a strong random value before going to production."
-    )
-MCP_SECRET_BYTES = MCP_SECRET_KEY.encode("utf-8")
-
-redis_client: redis.Redis | None = None
-
-
-def json_default(obj):
-    if isinstance(obj, (date, datetime)):
-        return obj.isoformat()
-    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
 
 def collect_results(
     response: ResourceIterator, num_results: int = DEFAULT_NUM_RESULTS
 ) -> list[dict]:
-    """Consume up to *num_results* items from a ResourceIterator.
-
-    Uses the iterator protocol so ``_page_result_index`` is kept in sync,
-    which means a subsequent ``dump()`` will capture the correct resume
-    point.
-    """
+    """Consume up to *num_results* items from a ResourceIterator."""
     return list(islice(response, num_results))
 
 
@@ -80,12 +25,12 @@ async def prepare_query_id(
     client: CourtListener,
     fields: list[str] | None = None,
 ) -> str:
-    """Store query response in Redis and return a short UUID query ID."""
+    """Store the query response and return a short UUID query ID."""
     query_id = make_id()
     data: dict = {"response": response.dump()}
     if fields is not None:
         data["fields"] = fields
-    await store_session_query(query_id, data, client)
+    await get_session().store_query(query_id, data, client)
     return query_id
 
 
@@ -217,217 +162,32 @@ def prepare_has_more_str(
     return None
 
 
-# User-scoped Redis session helpers.
-#
-# Keyed by an HMAC of the caller's API token rather than the MCP session id,
-# so state survives across stateless_http=True requests and across workers.
-def get_redis() -> redis.Redis:
-    """Lazily build a module-level async Redis client from REDIS_URL."""
-    global redis_client
-    if redis_client is None:
-        url = os.environ.get("REDIS_URL")
-        if not url:
-            raise RuntimeError(
-                "REDIS_URL is not set; cannot access session store."
-            )
-        redis_client = redis.from_url(url, decode_responses=True, protocol=3)
-    return redis_client
-
-
-def hmac_hex(value: str) -> str:
-    return hmac.new(
-        MCP_SECRET_BYTES, value.encode("utf-8"), hashlib.sha256
-    ).hexdigest()
-
-
-def token_cache_key(token: str) -> str:
-    """Redis key for the token→user_hash mapping set by the verifier."""
-    return f"mcp:token_to_user:{hmac_hex(token)}"
-
-
-async def resolve_user_hash_via_userinfo(token: str) -> str | None:
-    """Return the stable user_hash for *token*, hitting userinfo on cache miss.
-
-    Called from the auth verifier (see ``UserInfoTokenVerifier``). Returns
-    ``None`` if CL rejects the token, which the verifier translates into a
-    proper HTTP 401 at the auth layer.
-
-    The cache key is ``HMAC(token)``; the cache value is ``HMAC(sub)``. The
-    token never lands in Redis in plaintext, and the namespace is derived
-    from the stable OIDC ``sub`` claim so that rotated tokens still map to
-    the same user.
-    """
-    r = get_redis()
-    cache_key = token_cache_key(token)
-    cached = await r.get(cache_key)
-    if cached:
-        return cached
-
-    try:
-        async with httpx.AsyncClient(timeout=10) as http:
-            resp = await http.get(
-                OAUTH_USERINFO_URL,
-                headers={"Authorization": f"Bearer {token}"},
-            )
-    except httpx.HTTPError as exc:
-        logger.warning("userinfo call failed: %s", exc)
-        return None
-
-    if resp.status_code != 200:
-        # 401 from userinfo == revoked/expired/invalid. Don't cache.
-        return None
-
-    sub = resp.json().get("sub")
-    if not sub:
-        logger.warning("userinfo response missing `sub` claim")
-        return None
-
-    uh = hmac_hex(str(sub))
-    await r.set(cache_key, uh, ex=TOKEN_CACHE_TTL_SECONDS)
-    return uh
-
-
-async def invalidate_token_cache(token: str) -> None:
-    """Drop a token→user_hash mapping.
-
-    Called when CL rejects a token mid-cache (e.g. 401 on a downstream
-    API call). The *next* MCP request for this token will miss the cache,
-    re-hit userinfo, fail, and cause a proper HTTP 401 from the auth layer
-    so the MCP client re-runs OAuth.
-    """
-    try:
-        await get_redis().delete(token_cache_key(token))
-    except Exception as exc:
-        logger.warning("failed to invalidate token cache: %s", exc)
-
-
-def user_hash(client: CourtListener) -> str:
-    """Return the stable per-user key prefix for the current request.
-
-    OAuth path: reads ``user_hash`` from the FastMCP access-token claims,
-    which ``UserInfoTokenVerifier`` populated from the OIDC ``sub`` at
-    verification time. The hash survives access-token rotation because it
-    is derived from ``sub``, not the raw token.
-
-    Legacy path: hashes the API token directly, matching the old behavior
-    for non-OAuth requests.
-    """
-    try:
-        access_token = get_access_token()
-    except RuntimeError:
-        access_token = None
-
-    if access_token is not None:
-        uh = access_token.claims.get("user_hash")
-        if uh:
-            return uh
-        # Should not happen: UserInfoTokenVerifier always sets this. If
-        # another verifier is in use, fall through to token-based hashing.
-
-    token = client.api_token or client.access_token
-    if not token:
-        raise ValueError("Client has no credential; cannot derive user hash.")
-    return hmac_hex(token)
-
-
-def redis_key(client: CourtListener, suffix: str) -> str:
-    return f"mcp:{user_hash(client)}:{suffix}"
-
-
 def make_id() -> str:
     """Generate a short, random UUID for session-scoped tool state."""
     return str(uuid.uuid4())[:8]
 
 
-async def set_user_scoped(
-    client: CourtListener, suffix: str, value: Any
-) -> None:
-    await get_redis().set(
-        redis_key(client, suffix),
-        json.dumps(value, default=json_default),
-        ex=SESSION_TTL_SECONDS,
-    )
-
-
-async def get_user_scoped(client: CourtListener, suffix: str) -> Any:
-    raw = await get_redis().get(redis_key(client, suffix))
-    if raw is None:
-        return None
-    return json.loads(raw)
-
-
-async def get_session_query(
-    query_id: str, client: CourtListener
-) -> dict | None:
-    return await get_user_scoped(client, f"query:{query_id}")
-
-
-async def store_session_query(
-    query_id: str, data: dict, client: CourtListener
-) -> None:
-    await set_user_scoped(client, f"query:{query_id}", data)
-
-
-# Document cache helpers.
-#
-# Keyed by doc_type and doc_id — not user-scoped — so the same document
-# is only fetched from the API once regardless of which user requests it.
-DOCUMENT_TTL_SECONDS = 86400  # 24 hours
-
-DOC_TYPE_CONFIG: dict[str, tuple[str, str]] = {
-    "opinion": ("opinions", "html_with_citations"),
-    "recap_document": ("recap_documents", "plain_text"),
-}
-
-
-def doc_cache_key(doc_type: str, doc_id: int) -> str:
-    return f"mcp:doc:{doc_type}:{doc_id}"
-
-
-async def get_cached_document(doc_type: str, doc_id: int) -> str | None:
-    return await get_redis().get(doc_cache_key(doc_type, doc_id))
-
-
-async def store_cached_document(doc_type: str, doc_id: int, text: str) -> None:
-    await get_redis().set(
-        doc_cache_key(doc_type, doc_id),
-        text,
-        ex=DOCUMENT_TTL_SECONDS,
-    )
-
-
 async def fetch_document_text(
     doc_type: str, doc_id: int, client: CourtListener
 ) -> str | None:
-    """Return full document text, fetching from the API on cache miss.
-
-    Shared between read_document and search_document tools so the same
-    document is only pulled from the API once per 24-hour window.
-    """
-    if doc_type not in DOC_TYPE_CONFIG:
+    """Return full document text, fetching from the API on cache miss."""
+    doc_types = {
+        "opinion": ("opinions", "html_with_citations"),
+        "recap_document": ("recap_documents", "plain_text"),
+    }
+    if doc_type not in doc_types:
         raise ValueError(f"Unknown doc_type: {doc_type!r}")
 
-    cached = await get_cached_document(doc_type, doc_id)
+    session = get_session()
+    cached = await session.get_document(doc_type, doc_id)
     if cached is not None:
         return cached
 
-    resource_name, field = DOC_TYPE_CONFIG[doc_type]
+    resource_name, field = doc_types[doc_type]
     item = getattr(client, resource_name).get(doc_id, fields=[field])
     text = item.get(field) or ""
 
     if text:
-        await store_cached_document(doc_type, doc_id, text)
+        await session.store_document(doc_type, doc_id, text)
 
     return text or None
-
-
-async def get_session_citation_analysis(
-    job_id: str, client: CourtListener
-) -> dict | None:
-    return await get_user_scoped(client, f"citation:{job_id}")
-
-
-async def store_session_citation_analysis(
-    job_id: str, data: dict, client: CourtListener
-) -> None:
-    await set_user_scoped(client, f"citation:{job_id}", data)

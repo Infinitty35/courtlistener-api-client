@@ -1,19 +1,59 @@
+import logging
+
+import httpx
 from fastmcp.server.auth.auth import (
     AccessToken,
     TokenVerifier,
 )
 
-from courtlistener.mcp.tools.utils import resolve_user_hash_via_userinfo
+from courtlistener.mcp.session import get_session, hmac_hex
+from courtlistener.mcp.settings import (
+    OAUTH_USERINFO_URL,
+    USERINFO_TIMEOUT_SECONDS,
+)
+
+logger = logging.getLogger(__name__)
+
+
+async def resolve_user_hash_via_userinfo(token: str) -> str | None:
+    """Return the stable user_hash for *token*, hitting userinfo on cache miss."""
+    session = get_session()
+    cached = await session.get_user_hash(token)
+    if cached:
+        return cached
+
+    try:
+        async with httpx.AsyncClient(timeout=USERINFO_TIMEOUT_SECONDS) as http:
+            resp = await http.get(
+                OAUTH_USERINFO_URL,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+    except httpx.HTTPError as exc:
+        logger.warning("userinfo call failed: %s", exc)
+        return None
+
+    if resp.status_code != 200:
+        # 401 from userinfo == revoked/expired/invalid. Don't cache.
+        return None
+
+    sub = resp.json().get("sub")
+    if not sub:
+        logger.warning("userinfo response missing `sub` claim")
+        return None
+
+    uh = hmac_hex(str(sub))
+    await session.store_user_hash(token, uh)
+    return uh
 
 
 class UserInfoTokenVerifier(TokenVerifier):
     """Verify OAuth tokens by calling CL's OIDC userinfo endpoint.
 
-    Caches token→user_hash mappings in Redis so a burst of tool calls
-    from one session collapses to a single userinfo round-trip. The
-    cached ``user_hash`` is a stable HMAC of the OIDC ``sub`` claim, so
-    session state in Redis survives access-token rotation (previously,
-    a refresh silently orphaned the user's namespace).
+    Caches token→user_hash mappings in the session store so a burst of
+    tool calls from one session collapses to a single userinfo
+    round-trip. The cached ``user_hash`` is a stable HMAC of the OIDC
+    ``sub`` claim, so session state survives access-token rotation
+    (previously, a refresh silently orphaned the user's namespace).
 
     Revocation semantics:
     - A freshly-rejected token surfaces here as a 401 from userinfo →

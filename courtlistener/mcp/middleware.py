@@ -8,11 +8,8 @@ from fastmcp.tools import ToolResult
 from mcp.types import TextContent
 
 from courtlistener.exceptions import CourtListenerAPIError
+from courtlistener.mcp.session import get_session, json_default
 from courtlistener.mcp.tools import MCP_TOOLS
-from courtlistener.mcp.tools.utils import (
-    invalidate_token_cache,
-    json_default,
-)
 
 
 class ToolHandlerMiddleware(Middleware):
@@ -51,7 +48,7 @@ class ToolHandlerMiddleware(Middleware):
                 except RuntimeError:
                     access_token = None
                 if access_token is not None:
-                    await invalidate_token_cache(access_token.token)
+                    await get_session().invalidate_token(access_token.token)
                 raise ToolError(
                     "CourtListener rejected the request as unauthorized. "
                     "Your session may have expired; retry to re-authenticate."

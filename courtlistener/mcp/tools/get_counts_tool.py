@@ -1,8 +1,8 @@
 from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
+from courtlistener.mcp.session import get_session
 from courtlistener.mcp.tools.mcp_tool import MCPTool
-from courtlistener.mcp.tools.utils import get_session_query
 from courtlistener.resource import ResourceIterator
 
 
@@ -38,7 +38,7 @@ class GetCountsTool(MCPTool):
     async def __call__(self, arguments: dict, ctx: Context) -> dict[str, int]:
         query_id = arguments["query_id"]
         with self.get_client() as client:
-            data = await get_session_query(query_id, client)
+            data = await get_session().get_query(query_id, client)
             if data is None:
                 raise ValueError(
                     f"Query ID {query_id!r} not found. The session may have "

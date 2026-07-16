@@ -8,6 +8,7 @@ from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
+from courtlistener.mcp.session import get_session
 from courtlistener.mcp.tools.citation_utils import (
     MAX_CITATIONS_PER_REQUEST,
     build_compact_string,
@@ -19,10 +20,7 @@ from courtlistener.mcp.tools.citation_utils import (
     process_api_results,
 )
 from courtlistener.mcp.tools.mcp_tool import MCPTool
-from courtlistener.mcp.tools.utils import (
-    make_id,
-    store_session_citation_analysis,
-)
+from courtlistener.mcp.tools.utils import make_id
 
 
 class AnalyzeCitationsTool(MCPTool):
@@ -183,7 +181,7 @@ class AnalyzeCitationsTool(MCPTool):
 
             # Step 4: Store in user-scoped session store
             analysis_id = make_id()
-            await store_session_citation_analysis(
+            await get_session().store_citation_analysis(
                 analysis_id,
                 {
                     "resource_refs": resource_refs,
