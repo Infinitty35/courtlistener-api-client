@@ -13,7 +13,7 @@
           "type": "null"
         }
       ],
-      "description": "Filter which fields are returned."
+      "description": "Filter which fields are returned. Use the field names as they appear in search results (e.g. `caseName`, `dateFiled`), which differ from the API field names used by `call_endpoint` and `get_endpoint_item`."
     },
     "num_results": {
       "type": "integer",

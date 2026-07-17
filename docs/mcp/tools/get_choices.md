@@ -5,7 +5,7 @@
 **Get Field Choices**
 
 - **Source:** `courtlistener/mcp/tools/get_choices_tool.py`
-- **Estimated definition size:** ~183 tokens (description ~30, input schema ~82; cl100k_base)
+- **Estimated definition size:** ~399 tokens (description ~30, input schema ~298; cl100k_base)
 - **Parameters:** 2 (2 required)
 - **Raw input schema:** [`get_choices.inputs.json`](./get_choices.inputs.json)
 
@@ -28,9 +28,9 @@ Use this when a field's schema says to look up choices with this tool.
 
 ### `endpoint_id`
 
-string · **required**
+enum · **required** · one of: `"search"`, `"dockets"`, `"bankruptcy-information"`, `"originating-court-information"`, `"docket-entries"`, `"recap-documents"`, `"courts"`, `"audio"`, `"clusters"`, `"opinions"`, `"opinions-cited"`, `"tag"`, `"people"`, `"positions"`, `"retention-events"`, `"educations"`, `"schools"`, `"political-affiliations"`, `"sources"`, `"aba-ratings"`, `"parties"`, `"attorneys"`, `"recap-fetch"`, `"recap-query"`, `"fjc-integrated-database"`, `"tags"`, `"docket-tags"`, `"prayers"`, `"increment-event"`, `"visualizations/json"`, `"visualizations"`, `"agreements"`, `"debts"`, `"financial-disclosures"`, `"gifts"`, `"investments"`, `"non-investment-incomes"`, `"disclosure-positions"`, `"reimbursements"`, `"spouse-incomes"`, `"alerts"`, `"docket-alerts"`, `"opinion-search"`, `"recap-search"`, `"recap-document-search"`, `"recap-docket-search"`, `"judge-search"`, `"oral-argument-search"`
 
-The endpoint ID (e.g. 'courts', 'search', 'dockets').
+The endpoint the field belongs to.
 
 ### `field_name`
 

@@ -21,6 +21,7 @@ Changes:
 - Add `destructiveHint` to all MCP tool annotations.
 - Add OpenAI Apps domain-verification challenge token to MCP server.
 - Updated to reflect API changes in CourtListener (7/15/2026).
+- Improve endpoint_id and fields arguments and prompts.
 
 Fixes:
 - Catch falsy `SENTRY_DSN` variable.

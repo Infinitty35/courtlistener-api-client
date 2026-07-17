@@ -5,7 +5,7 @@
 **Search**
 
 - **Source:** `courtlistener/mcp/tools/search_tool.py`
-- **Estimated definition size:** ~3226 tokens (description ~78, input schema ~3081; cl100k_base)
+- **Estimated definition size:** ~3269 tokens (description ~78, input schema ~3124; cl100k_base)
 - **Parameters:** 46 (1 required)
 - **Raw input schema:** [`search.inputs.json`](./search.inputs.json)
 
@@ -34,7 +34,7 @@ be useful here.
 
 array of string | null · optional
 
-Filter which fields are returned.
+Filter which fields are returned. Use the field names as they appear in search results (e.g. `caseName`, `dateFiled`), which differ from the API field names used by `call_endpoint` and `get_endpoint_item`.
 
 ### `num_results`
 
