@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import cached_property
 from typing import Any
 
 from fastmcp.exceptions import ToolError
@@ -70,11 +71,18 @@ class MCPTool:
             "get_input_schema must be implemented by subclass"
         )
 
+    @cached_property
+    def input_validator(self) -> Draft202012Validator:
+        """Cached validator for the tool's input schema."""
+        return Draft202012Validator(self.get_input_schema())
+
     def validate_arguments(self, arguments: dict) -> None:
         """Check arguments against the tool's input schema."""
-        schema = self.get_input_schema()
+        arguments = {
+            key: value for key, value in arguments.items() if value is not None
+        }
         errors = sorted(
-            Draft202012Validator(schema).iter_errors(arguments),
+            self.input_validator.iter_errors(arguments),
             key=lambda error: list(error.path),
         )
         if not errors:
