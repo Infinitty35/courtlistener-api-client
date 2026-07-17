@@ -81,6 +81,7 @@ class ReadDocumentTool(MCPTool):
                     "default": DEFAULT_CHUNK_SIZE,
                 },
             },
+            "additionalProperties": False,
         }
 
     async def __call__(self, arguments: dict, ctx: Context) -> dict:

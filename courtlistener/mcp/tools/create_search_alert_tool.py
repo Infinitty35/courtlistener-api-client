@@ -57,6 +57,7 @@ class CreateSearchAlertTool(MCPTool):
                 },
             },
             "required": ["name", "query", "rate"],
+            "additionalProperties": False,
         }
 
     async def __call__(self, arguments: dict, ctx: Context) -> dict | str:
