@@ -10,6 +10,7 @@ from courtlistener.mcp.settings import (
 from courtlistener.mcp.tools.mcp_tool import MCPTool
 from courtlistener.mcp.tools.utils import (
     collect_results,
+    endpoint_id_property,
     prepare_count,
     prepare_has_more_str,
     prepare_query_id,
@@ -38,13 +39,16 @@ class CallEndpointTool(MCPTool):
         return {
             "type": "object",
             "properties": {
-                "endpoint_id": {
-                    "type": "string",
-                    "description": "Endpoint ID to call (see `get_endpoint_schema` tool for valid endpoint IDs)",
-                },
+                "endpoint_id": endpoint_id_property("The endpoint to call."),
                 "query": {
                     "type": "object",
-                    "description": "Should match the endpoint schema returned by the `get_endpoint_schema` tool.",
+                    "description": (
+                        "Should match the endpoint schema returned by the "
+                        "`get_endpoint_schema` tool. Every endpoint "
+                        "parameter goes in here, including `fields` — "
+                        "unlike the `search` tool, this tool takes no "
+                        "top-level `fields` argument."
+                    ),
                     "additionalProperties": True,
                 },
                 "num_results": {

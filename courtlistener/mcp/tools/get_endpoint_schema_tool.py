@@ -2,7 +2,11 @@ from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.mcp_tool import MCPTool
-from courtlistener.mcp.tools.utils import inline_refs, prepare_filter
+from courtlistener.mcp.tools.utils import (
+    endpoint_id_property,
+    inline_refs,
+    prepare_filter,
+)
 from courtlistener.models import ENDPOINTS
 
 
@@ -24,20 +28,12 @@ class GetEndpointSchemaTool(MCPTool):
 
     def get_input_schema(self) -> dict:
         """Get the input schema for the get_endpoint_schema tool."""
-        endpoint_ids = []
-        for endpoint in ENDPOINTS.values():
-            endpoint_id = endpoint.endpoint_id
-            if endpoint_id == "search" or endpoint_id.endswith("-search"):
-                continue
-            endpoint_ids.append(endpoint_id)
-        description = "Valid endpoint IDs:\n\t" + "\n\t".join(endpoint_ids)
         return {
             "type": "object",
             "properties": {
-                "endpoint_id": {
-                    "type": "string",
-                    "description": description,
-                },
+                "endpoint_id": endpoint_id_property(
+                    "The endpoint to get the schema for."
+                ),
             },
             "required": ["endpoint_id"],
             "additionalProperties": False,
@@ -65,4 +61,6 @@ class GetEndpointSchemaTool(MCPTool):
                     "properties": updated_properties,
                 }
                 return schema
+        # Unreachable: the schema's endpoint_id enum is validated in
+        # ToolHandlerMiddleware before dispatch. Guards the fall-through.
         raise ValueError(f"Endpoint '{endpoint_id}' not found")
