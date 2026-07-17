@@ -8,9 +8,33 @@ import tiktoken
 from courtlistener import CourtListener
 from courtlistener.mcp.session import get_session
 from courtlistener.mcp.settings import DEFAULT_NUM_RESULTS
+from courtlistener.models import ENDPOINTS
 from courtlistener.resource import ResourceIterator
 
 logger = logging.getLogger(__name__)
+
+
+def endpoint_id_choices(include_search: bool = False) -> list[str]:
+    """Valid endpoint_id values."""
+    choices = []
+    for endpoint in ENDPOINTS.values():
+        endpoint_id = endpoint.endpoint_id
+        is_search = endpoint_id == "search" or endpoint_id.endswith("-search")
+        if is_search and not include_search:
+            continue
+        choices.append(endpoint_id)
+    return choices
+
+
+def endpoint_id_property(
+    description: str, include_search: bool = False
+) -> dict:
+    """Build the endpoint_id schema property."""
+    return {
+        "type": "string",
+        "enum": endpoint_id_choices(include_search=include_search),
+        "description": description,
+    }
 
 
 def collect_results(
