@@ -5,7 +5,7 @@
 **Get More Results**
 
 - **Source:** `courtlistener/mcp/tools/get_more_results_tool.py`
-- **Estimated definition size:** ~198 tokens (description ~31, input schema ~94; cl100k_base)
+- **Estimated definition size:** ~203 tokens (description ~31, input schema ~100; cl100k_base)
 - **Parameters:** 2 (1 required)
 - **Raw input schema:** [`get_more_results.inputs.json`](./get_more_results.inputs.json)
 

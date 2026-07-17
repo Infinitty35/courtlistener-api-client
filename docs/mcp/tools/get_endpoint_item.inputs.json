@@ -34,5 +34,6 @@
   "required": [
     "endpoint_id",
     "item_id"
-  ]
+  ],
+  "additionalProperties": false
 }

@@ -5,7 +5,7 @@
 **Create Search Alert**
 
 - **Source:** `courtlistener/mcp/tools/create_search_alert_tool.py`
-- **Estimated definition size:** ~372 tokens (description ~24, input schema ~267; cl100k_base)
+- **Estimated definition size:** ~377 tokens (description ~24, input schema ~273; cl100k_base)
 - **Parameters:** 4 (3 required)
 - **Raw input schema:** [`create_search_alert.inputs.json`](./create_search_alert.inputs.json)
 

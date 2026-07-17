@@ -10,5 +10,6 @@
       "description": "Alternatively, if the opinion is available in CourtListener, you can provide the opinion ID"
     }
   },
-  "required": []
+  "required": [],
+  "additionalProperties": false
 }
