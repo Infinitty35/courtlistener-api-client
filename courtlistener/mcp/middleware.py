@@ -29,6 +29,8 @@ class ToolHandlerMiddleware(Middleware):
         if ctx is None:
             raise ValueError("No context found")
 
+        mcp_tool.validate_arguments(arguments)
+
         try:
             result = await mcp_tool(arguments, ctx)
         except CourtListenerAPIError as exc:

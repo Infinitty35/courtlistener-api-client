@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from fastmcp.exceptions import ToolError
 from fastmcp.server.context import Context
 from fastmcp.server.dependencies import get_access_token, get_http_request
 from fastmcp.tools import Tool
+from jsonschema import Draft202012Validator
 from mcp.types import ToolAnnotations
 
 from courtlistener import CourtListener
@@ -66,6 +68,26 @@ class MCPTool:
     def get_input_schema(self) -> dict:
         raise NotImplementedError(
             "get_input_schema must be implemented by subclass"
+        )
+
+    def validate_arguments(self, arguments: dict) -> None:
+        """Check arguments against the tool's input schema."""
+        schema = self.get_input_schema()
+        errors = sorted(
+            Draft202012Validator(schema).iter_errors(arguments),
+            key=lambda error: list(error.path),
+        )
+        if not errors:
+            return
+
+        messages = []
+        for error in errors:
+            location = ".".join(str(part) for part in error.path)
+            prefix = f"{location}: " if location else ""
+            messages.append(f"{prefix}{error.message}")
+        raise ToolError(
+            f"Invalid arguments for tool '{self.name}':\n- "
+            + "\n- ".join(messages)
         )
 
     async def __call__(self, arguments: dict, ctx: Context) -> Any:
