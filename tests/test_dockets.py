@@ -89,8 +89,13 @@ class TestDocketsList:
 @pytest.mark.integration
 class TestDocketsGet:
     def test_get_by_id(self, client):
-        """Get a specific docket and verify response structure."""
-        results = client.dockets.list()
+        """Get a specific docket and verify response structure.
+
+        The list call only exists to find a valid ID, so keep it cheap:
+        an unfiltered dockets list is the slowest query in this suite
+        and intermittently 504s when CourtListener is under load.
+        """
+        results = client.dockets.list(court="scotus", fields=["id"])
         assert results.results, "Need at least one docket"
 
         docket_id = results.results[0]["id"]
