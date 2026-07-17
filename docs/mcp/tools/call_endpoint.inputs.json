@@ -20,5 +20,6 @@
   },
   "required": [
     "endpoint_id"
-  ]
+  ],
+  "additionalProperties": false
 }

@@ -89,6 +89,7 @@ class SearchDocumentTool(MCPTool):
                 },
             },
             "required": ["query"],
+            "additionalProperties": False,
         }
 
     def _search_text(

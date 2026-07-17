@@ -8,5 +8,6 @@
   },
   "required": [
     "query_id"
-  ]
+  ],
+  "additionalProperties": false
 }

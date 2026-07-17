@@ -5,7 +5,7 @@
 **Get Item by ID**
 
 - **Source:** `courtlistener/mcp/tools/get_endpoint_item_tool.py`
-- **Estimated definition size:** ~200 tokens (description ~12, input schema ~117; cl100k_base)
+- **Estimated definition size:** ~205 tokens (description ~12, input schema ~123; cl100k_base)
 - **Parameters:** 3 (2 required)
 - **Raw input schema:** [`get_endpoint_item.inputs.json`](./get_endpoint_item.inputs.json)
 

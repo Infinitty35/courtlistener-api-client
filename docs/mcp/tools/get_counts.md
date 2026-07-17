@@ -5,7 +5,7 @@
 **Get Result Count**
 
 - **Source:** `courtlistener/mcp/tools/get_counts_tool.py`
-- **Estimated definition size:** ~152 tokens (description ~36, input schema ~44; cl100k_base)
+- **Estimated definition size:** ~157 tokens (description ~36, input schema ~50; cl100k_base)
 - **Parameters:** 1 (1 required)
 - **Raw input schema:** [`get_counts.inputs.json`](./get_counts.inputs.json)
 

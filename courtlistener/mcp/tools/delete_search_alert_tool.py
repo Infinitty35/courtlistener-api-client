@@ -30,6 +30,7 @@ class DeleteSearchAlertTool(MCPTool):
                 },
             },
             "required": ["id"],
+            "additionalProperties": False,
         }
 
     async def __call__(self, arguments: dict, ctx: Context) -> str:

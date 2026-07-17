@@ -91,6 +91,7 @@ class SearchTool(MCPTool):
             "type": "object",
             "properties": updated_properties,
             "required": ["type"],
+            "additionalProperties": False,
         }
 
     async def __call__(self, arguments: dict, ctx: Context) -> Any:

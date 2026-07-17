@@ -33,6 +33,7 @@ class UnsubscribeFromDocketAlertTool(MCPTool):
                 },
             },
             "required": ["docket"],
+            "additionalProperties": False,
         }
 
     async def __call__(self, arguments: dict, ctx: Context) -> str:

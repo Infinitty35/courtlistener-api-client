@@ -5,7 +5,7 @@
 **Search Document**
 
 - **Source:** `courtlistener/mcp/tools/search_document_tool.py`
-- **Estimated definition size:** ~469 tokens (description ~170, input schema ~223; cl100k_base)
+- **Estimated definition size:** ~474 tokens (description ~170, input schema ~229; cl100k_base)
 - **Parameters:** 4 (1 required)
 - **Raw input schema:** [`search_document.inputs.json`](./search_document.inputs.json)
 

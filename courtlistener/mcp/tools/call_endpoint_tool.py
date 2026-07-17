@@ -59,6 +59,7 @@ class CallEndpointTool(MCPTool):
                 },
             },
             "required": ["endpoint_id"],
+            "additionalProperties": False,
         }
 
     async def __call__(self, arguments: dict, ctx: Context) -> Any:

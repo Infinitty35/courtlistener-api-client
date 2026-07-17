@@ -41,6 +41,7 @@ class GetEndpointItemTool(MCPTool):
                 },
             },
             "required": ["endpoint_id", "item_id"],
+            "additionalProperties": False,
         }
 
     async def __call__(self, arguments: dict, ctx: Context) -> dict:

@@ -5,7 +5,7 @@
 **Read Document**
 
 - **Source:** `courtlistener/mcp/tools/read_document_tool.py`
-- **Estimated definition size:** ~526 tokens (description ~255, input schema ~189; cl100k_base)
+- **Estimated definition size:** ~531 tokens (description ~255, input schema ~195; cl100k_base)
 - **Parameters:** 4 (0 required)
 - **Raw input schema:** [`read_document.inputs.json`](./read_document.inputs.json)
 

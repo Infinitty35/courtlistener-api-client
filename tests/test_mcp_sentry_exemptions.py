@@ -18,6 +18,7 @@ from courtlistener.mcp.exceptions import (
     before_send,
 )
 from courtlistener.mcp.middleware import ToolHandlerMiddleware
+from courtlistener.mcp.tools.mcp_tool import MCPTool
 
 
 def _api_error(status_code: int, detail) -> CourtListenerAPIError:
@@ -27,11 +28,17 @@ def _api_error(status_code: int, detail) -> CourtListenerAPIError:
 
 
 async def _call_tool_raising(monkeypatch, exc):
-    async def fake_tool(arguments, ctx):
-        raise exc
+    class FakeTool(MCPTool):
+        name = "fake_tool"
+
+        def get_input_schema(self) -> dict:
+            return {"type": "object", "properties": {}}
+
+        async def __call__(self, arguments, ctx):
+            raise exc
 
     monkeypatch.setattr(
-        "courtlistener.mcp.middleware.MCP_TOOLS", {"fake_tool": fake_tool}
+        "courtlistener.mcp.middleware.MCP_TOOLS", {"fake_tool": FakeTool()}
     )
     context = MagicMock()
     context.message.name = "fake_tool"

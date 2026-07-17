@@ -13,5 +13,6 @@
   "required": [
     "endpoint_id",
     "field_name"
-  ]
+  ],
+  "additionalProperties": false
 }

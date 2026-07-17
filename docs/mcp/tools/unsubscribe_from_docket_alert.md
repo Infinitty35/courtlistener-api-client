@@ -5,7 +5,7 @@
 **Unsubscribe from Docket Alert**
 
 - **Source:** `courtlistener/mcp/tools/unsubscribe_from_docket_alert_tool.py`
-- **Estimated definition size:** ~189 tokens (description ~59, input schema ~39; cl100k_base)
+- **Estimated definition size:** ~194 tokens (description ~59, input schema ~45; cl100k_base)
 - **Parameters:** 1 (1 required)
 - **Raw input schema:** [`unsubscribe_from_docket_alert.inputs.json`](./unsubscribe_from_docket_alert.inputs.json)
 

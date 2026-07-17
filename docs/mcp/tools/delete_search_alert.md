@@ -5,7 +5,7 @@
 **Delete Search Alert**
 
 - **Source:** `courtlistener/mcp/tools/delete_search_alert_tool.py`
-- **Estimated definition size:** ~143 tokens (description ~24, input schema ~38; cl100k_base)
+- **Estimated definition size:** ~148 tokens (description ~24, input schema ~44; cl100k_base)
 - **Parameters:** 1 (1 required)
 - **Raw input schema:** [`delete_search_alert.inputs.json`](./delete_search_alert.inputs.json)
 

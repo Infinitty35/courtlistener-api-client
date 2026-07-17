@@ -42,5 +42,6 @@
     "name",
     "query",
     "rate"
-  ]
+  ],
+  "additionalProperties": false
 }

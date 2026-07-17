@@ -12,6 +12,7 @@ Features:
 - Added in-memory session support for MCP server.
 
 Changes:
+- Validate tool arguments against each tool's advertised input schema in `ToolHandlerMiddleware`.
 - Add `SentryExemptToolError` for tool errors triaged as known noise, dropped from Sentry reporting via a `before_send` hook.
 - Add fallback handling for HTTP errors in MCP tool handler middleware.
 - Add error message for rate limit exceeded errors.

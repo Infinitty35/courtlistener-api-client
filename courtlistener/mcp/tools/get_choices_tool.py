@@ -33,6 +33,7 @@ class GetChoicesTool(MCPTool):
                 },
             },
             "required": ["endpoint_id", "field_name"],
+            "additionalProperties": False,
         }
 
     async def __call__(
