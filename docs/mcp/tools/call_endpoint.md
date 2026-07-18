@@ -5,7 +5,7 @@
 **Call API Endpoint**
 
 - **Source:** `courtlistener/mcp/tools/call_endpoint_tool.py`
-- **Estimated definition size:** ~246 tokens (description ~39, input schema ~135; cl100k_base)
+- **Estimated definition size:** ~455 tokens (description ~39, input schema ~344; cl100k_base)
 - **Parameters:** 3 (1 required)
 - **Raw input schema:** [`call_endpoint.inputs.json`](./call_endpoint.inputs.json)
 
@@ -30,15 +30,15 @@ search endpoint and often include more detailed metadata.
 
 ### `endpoint_id`
 
-string · **required**
+enum · **required** · one of: `"dockets"`, `"bankruptcy-information"`, `"originating-court-information"`, `"docket-entries"`, `"recap-documents"`, `"courts"`, `"audio"`, `"clusters"`, `"opinions"`, `"opinions-cited"`, `"tag"`, `"people"`, `"positions"`, `"retention-events"`, `"educations"`, `"schools"`, `"political-affiliations"`, `"sources"`, `"aba-ratings"`, `"parties"`, `"attorneys"`, `"recap-fetch"`, `"recap-query"`, `"fjc-integrated-database"`, `"tags"`, `"docket-tags"`, `"prayers"`, `"increment-event"`, `"visualizations/json"`, `"visualizations"`, `"agreements"`, `"debts"`, `"financial-disclosures"`, `"gifts"`, `"investments"`, `"non-investment-incomes"`, `"disclosure-positions"`, `"reimbursements"`, `"spouse-incomes"`, `"alerts"`, `"docket-alerts"`
 
-Endpoint ID to call (see `get_endpoint_schema` tool for valid endpoint IDs)
+The endpoint to call.
 
 ### `query`
 
 object · optional
 
-Should match the endpoint schema returned by the `get_endpoint_schema` tool.
+Should match the endpoint schema returned by the `get_endpoint_schema` tool. Every endpoint parameter goes in here, including `fields` — unlike the `search` tool, this tool takes no top-level `fields` argument.
 
 ### `num_results`
 

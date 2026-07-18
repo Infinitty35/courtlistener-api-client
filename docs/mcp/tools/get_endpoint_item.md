@@ -5,7 +5,7 @@
 **Get Item by ID**
 
 - **Source:** `courtlistener/mcp/tools/get_endpoint_item_tool.py`
-- **Estimated definition size:** ~205 tokens (description ~12, input schema ~123; cl100k_base)
+- **Estimated definition size:** ~429 tokens (description ~12, input schema ~347; cl100k_base)
 - **Parameters:** 3 (2 required)
 - **Raw input schema:** [`get_endpoint_item.inputs.json`](./get_endpoint_item.inputs.json)
 
@@ -26,9 +26,9 @@ Get an item by ID from a CourtListener API endpoint.
 
 ### `endpoint_id`
 
-string · **required**
+enum · **required** · one of: `"dockets"`, `"bankruptcy-information"`, `"originating-court-information"`, `"docket-entries"`, `"recap-documents"`, `"courts"`, `"audio"`, `"clusters"`, `"opinions"`, `"opinions-cited"`, `"tag"`, `"people"`, `"positions"`, `"retention-events"`, `"educations"`, `"schools"`, `"political-affiliations"`, `"sources"`, `"aba-ratings"`, `"parties"`, `"attorneys"`, `"recap-fetch"`, `"recap-query"`, `"fjc-integrated-database"`, `"tags"`, `"docket-tags"`, `"prayers"`, `"increment-event"`, `"visualizations/json"`, `"visualizations"`, `"agreements"`, `"debts"`, `"financial-disclosures"`, `"gifts"`, `"investments"`, `"non-investment-incomes"`, `"disclosure-positions"`, `"reimbursements"`, `"spouse-incomes"`, `"alerts"`, `"docket-alerts"`
 
-Endpoint ID to get an item from
+The endpoint to get an item from.
 
 ### `item_id`
 
@@ -40,4 +40,4 @@ The ID of the item to get.
 
 array of string | null · optional
 
-Filter which fields are returned.
+Filter which fields are returned. Use the field names from the endpoint's own schema (see the `get_endpoint_schema` tool), not the field names returned by the `search` tool.

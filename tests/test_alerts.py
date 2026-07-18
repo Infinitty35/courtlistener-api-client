@@ -1,5 +1,6 @@
 """Tests for SearchAlerts and DocketAlerts helpers."""
 
+from contextlib import suppress
 from unittest.mock import MagicMock
 from urllib.parse import parse_qs
 
@@ -186,170 +187,139 @@ class TestDocketAlertsValidation:
 
 # ---------------------------------------------------------------------------
 # Integration tests (hit the real API)
+#
+# Each resource gets ONE sequential lifecycle test rather than a test
+# per operation. The per-operation tests each did their own
+# create/delete round-trip, which had two failure modes: any
+# interrupted run left an orphan alert behind (only the test's own
+# alert was cleaned up), and the account's server-side alert quota
+# then made every later create fail with a 400 — presenting as
+# "create/delete is broken" forever after. A single lifecycle makes
+# the ordering explicit, cuts the request count, and starts by
+# sweeping orphans. Stage names in the failure message identify which
+# step broke.
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.integration
 class TestSearchAlertsIntegration:
-    def test_create_search_alert(self, client):
-        alert = None
+    NAME_PREFIX = "SDK Test"
+
+    def test_search_alert_lifecycle(self, client):
+        # Sweep orphans from interrupted earlier runs — leftover test
+        # alerts otherwise pile up against the account's alert quota.
+        for orphan in client.alerts.list():
+            if orphan["name"].startswith(self.NAME_PREFIX):
+                client.alerts.delete(orphan["id"])
+
+        created = []
+        stage = "create"
         try:
             alert = client.alerts.create(
-                name="SDK Test Alert",
-                query='q="sdk create alert integration test"',
+                name=f"{self.NAME_PREFIX} Lifecycle",
+                query='q="sdk lifecycle integration test"',
                 rate="off",
             )
+            created.append(alert)
             assert isinstance(alert, dict)
-            assert alert["name"] == "SDK Test Alert"
+            assert alert["name"] == f"{self.NAME_PREFIX} Lifecycle"
             assert alert["rate"] == "off"
             assert "id" in alert
-        finally:
-            if alert and "id" in alert:
-                client.alerts.delete(alert["id"])
 
-    def test_get_search_alert(self, client):
-        alert = None
-        try:
-            alert = client.alerts.create(
-                name="SDK Get Test",
-                query="q=get",
-                rate="off",
-            )
+            stage = "get"
             fetched = client.alerts.get(alert["id"])
             assert fetched["id"] == alert["id"]
-            assert fetched["name"] == "SDK Get Test"
-        finally:
-            if alert and "id" in alert:
-                client.alerts.delete(alert["id"])
+            assert fetched["name"] == alert["name"]
 
-    def test_update_search_alert(self, client):
-        alert = None
-        try:
-            alert = client.alerts.create(
-                name="SDK Update Test",
-                query="q=update",
-                rate="off",
+            stage = "update"
+            updated = client.alerts.update(
+                alert["id"], name=f"{self.NAME_PREFIX} Updated"
             )
-            updated = client.alerts.update(alert["id"], name="SDK Updated")
-            assert updated["name"] == "SDK Updated"
-        finally:
-            if alert and "id" in alert:
-                client.alerts.delete(alert["id"])
+            assert updated["name"] == f"{self.NAME_PREFIX} Updated"
 
-    def test_delete_search_alert(self, client):
-        alert = client.alerts.create(
-            name="SDK Delete Test",
-            query="q=delete",
-            rate="off",
-        )
-        client.alerts.delete(alert["id"])
+            stage = "list"
+            listed_ids = [a["id"] for a in client.alerts.list()]
+            assert alert["id"] in listed_ids
 
-    def test_list_search_alerts(self, client):
-        alert = None
-        try:
-            alert = client.alerts.create(
-                name="SDK List Test",
-                query='q="sdk list alerts integration test"',
-                rate="off",
-            )
-            results = client.alerts.list()
-            assert len(results.results) >= 1
-        finally:
-            if alert and "id" in alert:
-                client.alerts.delete(alert["id"])
-
-    def test_create_search_alert_with_dict_query(self, client):
-        alert = None
-        try:
-            alert = client.alerts.create(
-                name="SDK Dict Query Test",
+            stage = "create-dict-query"
+            dict_alert = client.alerts.create(
+                name=f"{self.NAME_PREFIX} Dict Query",
                 query={"q": '"sdk dict query integration test"', "type": "o"},
                 rate="off",
             )
-            assert isinstance(alert, dict)
-            assert alert["name"] == "SDK Dict Query Test"
-            assert "id" in alert
+            created.append(dict_alert)
+            assert dict_alert["name"] == f"{self.NAME_PREFIX} Dict Query"
+            assert "id" in dict_alert
+
+            stage = "delete"
+            for a in created:
+                client.alerts.delete(a["id"])
+
+            stage = "verify-delete"
+            with pytest.raises(CourtListenerAPIError) as excinfo:
+                client.alerts.get(alert["id"])
+            assert excinfo.value.status_code == 404
+            created = []
+        except CourtListenerAPIError as exc:
+            pytest.fail(
+                f"search-alert lifecycle failed at stage {stage!r}: {exc}"
+            )
         finally:
-            if alert and "id" in alert:
-                client.alerts.delete(alert["id"])
+            for a in created:
+                with suppress(CourtListenerAPIError):
+                    client.alerts.delete(a["id"])
 
 
 @pytest.mark.integration
 class TestDocketAlertsIntegration:
-    """Integration tests for DocketAlerts.
+    """Docket-alert lifecycle against docket 68571705 (a known docket).
 
-    These tests use docket ID 68571705 which is a known docket
-    in the CourtListener database.
+    The docket+user pair is unique server-side, so an alert left
+    behind by an interrupted run makes every later ``create`` 400
+    until someone cleans it up — hence the sweep on both ends.
     """
 
     DOCKET_ID = 68571705
 
-    @pytest.fixture(autouse=True)
-    def clean_docket_alerts(self, client):
-        """Delete any alert for DOCKET_ID before and after each test.
+    def _sweep(self, client):
+        for alert in client.docket_alerts.list(docket=self.DOCKET_ID):
+            client.docket_alerts.delete(alert["id"])
 
-        The docket+user pair is unique server-side, so an alert left
-        behind by an interrupted run makes every later ``create`` 400
-        until someone cleans it up manually.
-        """
-
-        def cleanup():
-            alert_ids = [
-                alert["id"]
-                for alert in client.docket_alerts.list(docket=self.DOCKET_ID)
-            ]
-            for alert_id in alert_ids:
-                client.docket_alerts.delete(alert_id)
-
-        cleanup()
-        yield
-        cleanup()
-
-    def test_create_docket_alert(self, client):
-        alert = None
+    def test_docket_alert_lifecycle(self, client):
+        self._sweep(client)
+        stage = "create"
         try:
             alert = client.docket_alerts.create(docket=self.DOCKET_ID)
             assert isinstance(alert, dict)
             assert alert["alert_type"] == 1
             assert "id" in alert
-        finally:
-            if alert and "id" in alert:
-                client.docket_alerts.delete(alert["id"])
 
-    def test_subscribe(self, client):
-        alert = None
-        try:
-            alert = client.docket_alerts.subscribe(docket=self.DOCKET_ID)
-            assert isinstance(alert, dict)
-            assert alert["alert_type"] == 1
-        finally:
-            if alert and "id" in alert:
-                client.docket_alerts.delete(alert["id"])
-
-    def test_unsubscribe(self, client):
-        client.docket_alerts.subscribe(docket=self.DOCKET_ID)
-        client.docket_alerts.unsubscribe(docket=self.DOCKET_ID)
-
-    def test_update_docket_alert(self, client):
-        alert = None
-        try:
-            alert = client.docket_alerts.create(docket=self.DOCKET_ID)
+            stage = "update"
             updated = client.docket_alerts.update(alert["id"], alert_type=0)
             assert updated["alert_type"] == 0
-        finally:
-            if alert and "id" in alert:
-                client.docket_alerts.delete(alert["id"])
 
-    def test_delete_docket_alert(self, client):
-        alert = client.docket_alerts.create(docket=self.DOCKET_ID)
-        client.docket_alerts.delete(alert["id"])
+            stage = "delete"
+            client.docket_alerts.delete(alert["id"])
 
-    def test_list_docket_alerts(self, client):
-        alert = None
-        try:
-            alert = client.docket_alerts.create(docket=self.DOCKET_ID)
-            results = client.docket_alerts.list()
-            assert len(results.results) >= 1
+            stage = "subscribe"
+            sub = client.docket_alerts.subscribe(docket=self.DOCKET_ID)
+            assert sub["alert_type"] == 1
+            assert "already_subscribed" not in sub
+
+            stage = "subscribe-idempotent"
+            again = client.docket_alerts.subscribe(docket=self.DOCKET_ID)
+            assert again["id"] == sub["id"]
+            assert again["already_subscribed"] is True
+
+            stage = "unsubscribe"
+            client.docket_alerts.unsubscribe(docket=self.DOCKET_ID)
+
+            stage = "unsubscribe-when-empty"
+            with pytest.raises(ValueError):
+                client.docket_alerts.unsubscribe(docket=self.DOCKET_ID)
+        except CourtListenerAPIError as exc:
+            pytest.fail(
+                f"docket-alert lifecycle failed at stage {stage!r}: {exc}"
+            )
         finally:
-            if alert and "id" in alert:
-                client.docket_alerts.delete(alert["id"])
+            self._sweep(client)

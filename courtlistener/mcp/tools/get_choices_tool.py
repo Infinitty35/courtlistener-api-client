@@ -2,7 +2,9 @@ from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.mcp_tool import MCPTool
+from courtlistener.mcp.tools.utils import endpoint_id_property
 from courtlistener.models import ENDPOINTS
+from courtlistener.utils import did_you_mean
 
 
 class GetChoicesTool(MCPTool):
@@ -23,10 +25,10 @@ class GetChoicesTool(MCPTool):
         return {
             "type": "object",
             "properties": {
-                "endpoint_id": {
-                    "type": "string",
-                    "description": "The endpoint ID (e.g. 'courts', 'search', 'dockets').",
-                },
+                "endpoint_id": endpoint_id_property(
+                    "The endpoint the field belongs to.",
+                    include_search=True,
+                ),
                 "field_name": {
                     "type": "string",
                     "description": "The field name to get choices for.",
@@ -49,7 +51,9 @@ class GetChoicesTool(MCPTool):
             field_info = endpoint.model_fields.get(field_name)
             if field_info is None:
                 raise ValueError(
-                    f"Field '{field_name}' not found on endpoint '{endpoint_id}'"
+                    f"Field '{field_name}' not found on endpoint "
+                    f"'{endpoint_id}'."
+                    f"{did_you_mean(field_name, list(endpoint.model_fields))}"
                 )
 
             extra = getattr(field_info, "json_schema_extra", {}) or {}
@@ -61,4 +65,6 @@ class GetChoicesTool(MCPTool):
 
             return {"choices": choices}
 
+        # Unreachable: the schema's endpoint_id enum is validated in
+        # ToolHandlerMiddleware before dispatch. Guards the fall-through.
         raise ValueError(f"Endpoint '{endpoint_id}' not found")

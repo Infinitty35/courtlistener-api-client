@@ -16,10 +16,36 @@ fields and relationships that the search index does not.
 
 # Use the `fields` argument
 
-Both `search` and `call_endpoint` accept a `fields` argument that restricts
-the response payload to the fields you name. CourtListener responses can be
-very large; using `fields` aggressively reduces token usage and latency.
-Default to requesting only the fields you actually need.
+CourtListener responses can be very large; restricting the fields returned
+aggressively reduces token usage and latency. Default to requesting only the
+fields you actually need.
+
+Where `fields` goes depends on the tool:
+- `search` and `get_endpoint_item` take `fields` as a top-level argument.
+- `call_endpoint` takes it inside `query`, along with every other endpoint
+  parameter — it has no top-level `fields` argument. For example:
+  `{"endpoint_id": "dockets", "query": {"court": "scotus", "fields": ["id", "case_name"]}}`
+
+The difference is not arbitrary. The non-search endpoints support `fields`
+natively, so it belongs in `query` with their other parameters and
+CourtListener does the filtering. Search does not support it, so the `search`
+tool accepts `fields` itself and filters after the fact.
+
+# Field names differ between search and the API
+
+Field names in `search` results are not the API field names used by
+`call_endpoint` and `get_endpoint_item`. Search returns camelCase names like
+`caseName`, `dateFiled`, and `citation`; the corresponding API fields are
+`case_name`, `date_filed`, and `citations` (note the plural). Don't copy a
+name out of a search result and use it as an API field — check the endpoint's
+schema with `get_endpoint_schema`.
+
+Case metadata and opinion text also live on different endpoints. The
+`opinions` endpoint holds a single opinion's text and authorship
+(`plain_text`, `html_with_citations`, `author`, `type`). The case-level
+metadata belongs to the cluster: `case_name`, `date_filed`, `citations`, and
+`judges` are fields on `clusters`, not on `opinions`. An opinion record links
+to its cluster via `cluster_id`.
 
 # Reading document text
 
@@ -33,7 +59,7 @@ citation markup); for RECAP documents, they use `plain_text`.
 
 When fetching opinion or RECAP document records via `call_endpoint` or
 `get_endpoint_item`, exclude text fields (`html_with_citations`, `plain_text`,
-`html`, `html_lawbox`, etc.) from the `fields` argument — they can be
+`html`, `html_lawbox`, etc.) from the fields you request — they can be
 enormous and are better accessed through `read_document`.
 
 Avoid trying to fetch PDFs directly, as the courtlistener storages urls are not

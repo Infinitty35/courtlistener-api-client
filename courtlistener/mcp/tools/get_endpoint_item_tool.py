@@ -2,6 +2,7 @@ from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.mcp_tool import MCPTool
+from courtlistener.mcp.tools.utils import endpoint_id_property
 from courtlistener.models import ENDPOINTS
 
 
@@ -21,10 +22,9 @@ class GetEndpointItemTool(MCPTool):
         return {
             "type": "object",
             "properties": {
-                "endpoint_id": {
-                    "type": "string",
-                    "description": "Endpoint ID to get an item from",
-                },
+                "endpoint_id": endpoint_id_property(
+                    "The endpoint to get an item from."
+                ),
                 "item_id": {
                     "anyOf": [
                         {"type": "string"},
@@ -37,7 +37,12 @@ class GetEndpointItemTool(MCPTool):
                         {"type": "array", "items": {"type": "string"}},
                         {"type": "null"},
                     ],
-                    "description": "Filter which fields are returned.",
+                    "description": (
+                        "Filter which fields are returned. Use the field "
+                        "names from the endpoint's own schema (see the "
+                        "`get_endpoint_schema` tool), not the field names "
+                        "returned by the `search` tool."
+                    ),
                 },
             },
             "required": ["endpoint_id", "item_id"],
@@ -60,4 +65,6 @@ class GetEndpointItemTool(MCPTool):
                     item = resource.get(item_id, fields=fields)
                     return item
 
+        # Unreachable: the schema's endpoint_id enum is validated in
+        # ToolHandlerMiddleware before dispatch. Guards the fall-through.
         raise ValueError(f"Endpoint '{endpoint_id}' not found")

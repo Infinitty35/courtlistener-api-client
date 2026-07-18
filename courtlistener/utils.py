@@ -1,4 +1,6 @@
+import difflib
 import re
+from collections.abc import Iterable
 from contextlib import suppress
 from datetime import date
 from typing import TYPE_CHECKING, Any
@@ -7,6 +9,16 @@ from pydantic import TypeAdapter, ValidationInfo
 
 if TYPE_CHECKING:
     from courtlistener.models import Endpoint
+
+
+def did_you_mean(value: Any, choices: Iterable[Any]) -> str:
+    """Suggest near-miss matches for value from choices."""
+    matches = difflib.get_close_matches(
+        str(value), [str(choice) for choice in choices], n=3, cutoff=0.6
+    )
+    if not matches:
+        return ""
+    return f" Did you mean: {', '.join(matches)}?"
 
 
 def flatten_filters(
@@ -73,8 +85,11 @@ def validate_model_fields(
                         values.append(choice["value"])
                 invalid_fields = [f for f in fields if f not in values]
                 if invalid_fields:
+                    suggestions = "".join(
+                        did_you_mean(f, values) for f in invalid_fields
+                    )
                     raise ValueError(
-                        f"Invalid fields: {invalid_fields}\n"
+                        f"Invalid fields: {invalid_fields}.{suggestions}\n"
                         f"Fields must be one of: {values}"
                     )
     return fields
