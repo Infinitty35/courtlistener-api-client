@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.async_client.resource import AsyncResourceIterator
@@ -27,7 +26,7 @@ class GetMoreResultsTool(MCPTool):
     """
 
     name: str = "get_more_results"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Get More Results",
         readOnlyHint=True,
         destructiveHint=False,
@@ -61,7 +60,7 @@ class GetMoreResultsTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> str | dict:
+    async def call(self, arguments: dict) -> str | dict:
         query_id = arguments["query_id"]
         num_results = arguments.get("num_results", DEFAULT_NUM_RESULTS)
 

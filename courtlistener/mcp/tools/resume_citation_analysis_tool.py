@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
@@ -27,7 +26,7 @@ class ResumeCitationAnalysisTool(MCPTool):
     """
 
     name: str = "resume_citation_analysis"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Resume Citation Analysis",
         readOnlyHint=True,
         destructiveHint=False,
@@ -63,7 +62,7 @@ class ResumeCitationAnalysisTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> str:
+    async def call(self, arguments: dict) -> str:
         job_id = arguments["job_id"]
         wait = bool(arguments.get("wait", False))
         async with self.get_client() as client:

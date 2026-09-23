@@ -12,7 +12,7 @@ from courtlistener.models import ENDPOINTS
 
 def _schema(endpoint_id: str) -> dict:
     tool = MCP_TOOLS["get_endpoint_schema"]
-    return asyncio.run(tool({"endpoint_id": endpoint_id}, None))
+    return asyncio.run(tool.call({"endpoint_id": endpoint_id}))
 
 
 def _non_search_endpoint_ids() -> list[str]:

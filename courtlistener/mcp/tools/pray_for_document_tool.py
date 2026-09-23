@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
@@ -26,7 +25,7 @@ class PrayForDocumentTool(MCPTool):
     """
 
     name: str = "pray_for_document"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Pray for Document",
         readOnlyHint=False,
         destructiveHint=False,
@@ -51,7 +50,7 @@ class PrayForDocumentTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> dict | str:
+    async def call(self, arguments: dict) -> dict | str:
         recap_document_id = arguments["recap_document_id"]
 
         async with self.get_client() as client:

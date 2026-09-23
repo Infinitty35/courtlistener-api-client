@@ -14,12 +14,8 @@ from courtlistener.mcp.exceptions import ToolArgumentValidationError
 from courtlistener.mcp.tools import MCP_TOOLS
 
 
-class FakeContext:
-    pass
-
-
 async def call(**arguments):
-    return await MCP_TOOLS["get_choices"](arguments, FakeContext())
+    return await MCP_TOOLS["get_choices"].call(arguments)
 
 
 class TestGetChoices:

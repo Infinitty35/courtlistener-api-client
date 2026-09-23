@@ -51,7 +51,9 @@ def _pray_tool(monkeypatch, document=UNAVAILABLE, create=PRAYER):
     else:
         client.prayers.create.return_value = create
     tool = PrayForDocumentTool()
-    monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+    monkeypatch.setattr(
+        type(tool), "get_client", lambda self: _client_cm(client)
+    )
     return tool, client
 
 
@@ -61,7 +63,7 @@ class TestPrayForDocument:
     ):
         tool, client = _pray_tool(monkeypatch)
 
-        result = await tool({"recap_document_id": 112}, ctx=MagicMock())
+        result = await tool.call({"recap_document_id": 112})
 
         client.prayers.create.assert_awaited_once_with(112)
         assert result["id"] == 7
@@ -73,7 +75,7 @@ class TestPrayForDocument:
     async def test_checks_availability_with_narrow_fields(self, monkeypatch):
         tool, client = _pray_tool(monkeypatch)
 
-        await tool({"recap_document_id": 112}, ctx=MagicMock())
+        await tool.call({"recap_document_id": 112})
 
         _, kwargs = client.recap_documents.get.await_args
         assert "is_available" in kwargs["fields"]
@@ -84,7 +86,7 @@ class TestPrayForDocument:
             monkeypatch, document={**UNAVAILABLE, "is_available": True}
         )
 
-        result = await tool({"recap_document_id": 112}, ctx=MagicMock())
+        result = await tool.call({"recap_document_id": 112})
 
         client.prayers.create.assert_not_awaited()
         assert "already available" in result
@@ -95,7 +97,7 @@ class TestPrayForDocument:
             monkeypatch, document=_api_error(404, {"detail": "Not found."})
         )
 
-        result = await tool({"recap_document_id": 1}, ctx=MagicMock())
+        result = await tool.call({"recap_document_id": 1})
 
         client.prayers.create.assert_not_awaited()
         assert result == "No RECAP document found with id 1."
@@ -108,7 +110,7 @@ class TestPrayForDocument:
         }
         tool, _ = _pray_tool(monkeypatch, create=_api_error(400, detail))
 
-        result = await tool({"recap_document_id": 112}, ctx=MagicMock())
+        result = await tool.call({"recap_document_id": 112})
 
         assert result.startswith("You are already praying for RECAP document")
         assert "HTTP 400" not in result
@@ -122,7 +124,7 @@ class TestPrayForDocument:
         }
         tool, _ = _pray_tool(monkeypatch, create=_api_error(400, detail))
 
-        result = await tool({"recap_document_id": 112}, ctx=MagicMock())
+        result = await tool.call({"recap_document_id": 112})
 
         assert result.startswith("Could not pray for RECAP document 112:")
         assert "maximum number of prayers" in result
@@ -132,7 +134,7 @@ class TestPrayForDocument:
         tool, _ = _pray_tool(monkeypatch, create=_api_error(500, "boom"))
 
         with pytest.raises(CourtListenerAPIError) as exc_info:
-            await tool({"recap_document_id": 112}, ctx=MagicMock())
+            await tool.call({"recap_document_id": 112})
         assert exc_info.value.status_code == 500
 
     async def test_document_lookup_server_error_still_raises(
@@ -141,7 +143,7 @@ class TestPrayForDocument:
         tool, _ = _pray_tool(monkeypatch, document=_api_error(503, "down"))
 
         with pytest.raises(CourtListenerAPIError) as exc_info:
-            await tool({"recap_document_id": 112}, ctx=MagicMock())
+            await tool.call({"recap_document_id": 112})
         assert exc_info.value.status_code == 503
 
 
@@ -149,7 +151,9 @@ def _withdraw_tool(monkeypatch, existing):
     client = AsyncMock()
     client.prayers.list = MagicMock(return_value=_aiter(existing))
     tool = WithdrawPrayerTool()
-    monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+    monkeypatch.setattr(
+        type(tool), "get_client", lambda self: _client_cm(client)
+    )
     return tool, client
 
 
@@ -157,7 +161,7 @@ class TestWithdrawPrayer:
     async def test_deletes_pending_prayer_by_document(self, monkeypatch):
         tool, client = _withdraw_tool(monkeypatch, [PRAYER])
 
-        result = await tool({"recap_document_id": 112}, ctx=MagicMock())
+        result = await tool.call({"recap_document_id": 112})
 
         client.prayers.list.assert_called_once_with(recap_document=112)
         client.prayers.delete.assert_awaited_once_with(7)
@@ -166,7 +170,7 @@ class TestWithdrawPrayer:
     async def test_no_prayer_returns_clean_message(self, monkeypatch):
         tool, client = _withdraw_tool(monkeypatch, [])
 
-        result = await tool({"recap_document_id": 112}, ctx=MagicMock())
+        result = await tool.call({"recap_document_id": 112})
 
         client.prayers.delete.assert_not_awaited()
         assert result == "No pending prayer found for RECAP document 112."

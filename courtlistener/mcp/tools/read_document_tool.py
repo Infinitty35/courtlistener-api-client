@@ -1,6 +1,5 @@
 import math
 
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.exceptions import ToolArgumentValidationError
@@ -40,7 +39,7 @@ class ReadDocumentTool(MCPTool):
     """
 
     name: str = "read_document"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Read Document",
         readOnlyHint=True,
         destructiveHint=False,
@@ -99,7 +98,7 @@ class ReadDocumentTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> dict:
+    async def call(self, arguments: dict) -> dict:
         opinion_id = arguments.get("opinion_id")
         recap_document_id = arguments.get("recap_document_id")
         cluster_id = arguments.get("cluster_id")

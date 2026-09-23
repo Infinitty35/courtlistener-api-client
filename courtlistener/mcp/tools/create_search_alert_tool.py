@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
@@ -12,7 +11,7 @@ class CreateSearchAlertTool(MCPTool):
     """
 
     name: str = "create_search_alert"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Create Search Alert",
         readOnlyHint=False,
         destructiveHint=False,
@@ -60,7 +59,7 @@ class CreateSearchAlertTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> dict | str:
+    async def call(self, arguments: dict) -> dict | str:
         name = arguments["name"]
         query = arguments["query"]
         rate = arguments["rate"]

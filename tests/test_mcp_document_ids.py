@@ -235,7 +235,7 @@ class TestAddOpinionIds:
             ]
         )
         with patch.object(SearchTool, "get_client", return_value=client):
-            result = run(tool({"type": "o", "fields": ["caseName"]}, None))
+            result = run(tool.call({"type": "o", "fields": ["caseName"]}))
         assert result["results"] == [
             {
                 "caseName": "NYSA Series Trust v. Dessein",
@@ -262,7 +262,7 @@ class TestAddOpinionIds:
             ) as iterator_cls,
         ):
             iterator_cls.load.return_value = fake
-            result = run(tool({"query_id": "qid12345"}, None))
+            result = run(tool.call({"query_id": "qid12345"}))
         assert result["results"][0]["opinion_id"] == 42
 
 
@@ -426,7 +426,7 @@ class TestReadDocumentClusterId:
             cluster_opinions={8695893: [8678997, 9000001]},
         )
         with patch.object(ReadDocumentTool, "get_client", return_value=client):
-            result = run(tool({"cluster_id": 8695893}, None))
+            result = run(tool.call({"cluster_id": 8695893}))
         assert result["doc_id"] == 8678997
         assert result["cluster_opinions"] == [
             {"id": 8678997},
@@ -436,7 +436,7 @@ class TestReadDocumentClusterId:
 
     def test_rejects_multiple_id_kinds(self):
         with pytest.raises(ToolArgumentValidationError, match="exactly one"):
-            run(ReadDocumentTool()({"opinion_id": 1, "cluster_id": 2}, None))
+            run(ReadDocumentTool().call({"opinion_id": 1, "cluster_id": 2}))
 
     def test_schema_accepts_cluster_id(self):
         MCP_TOOLS["read_document"].validate_arguments({"cluster_id": 123})
@@ -446,7 +446,7 @@ class TestReadDocumentClusterId:
         client = make_client(cluster_opinions={5: [10, 11]})
         client.opinions.get.side_effect = RuntimeError("HTTP 404: not found")
         with patch.object(ReadDocumentTool, "get_client", return_value=client):
-            result = run(tool({"cluster_id": 5}, None))
+            result = run(tool.call({"cluster_id": 5}))
         assert result["doc_id"] == 10
         assert result["error"] == "HTTP 404: not found"
         assert ids(result["cluster_opinions"]) == [10, 11]
@@ -465,7 +465,7 @@ class TestSearchDocumentClusterId:
         with patch.object(
             SearchDocumentTool, "get_client", return_value=client
         ):
-            result = run(tool({"cluster_id": 5, "query": "alpha"}, None))
+            result = run(tool.call({"cluster_id": 5, "query": "alpha"}))
         assert result["doc_id"] == 10
         assert result["match_count"] == 1
         assert ids(result["cluster_opinions"]) == [10, 11]
@@ -480,7 +480,7 @@ class TestSearchDocumentClusterId:
         with patch.object(
             SearchDocumentTool, "get_client", return_value=client
         ):
-            result = run(tool({"cluster_id": 5, "query": "alpha"}, None))
+            result = run(tool.call({"cluster_id": 5, "query": "alpha"}))
         assert result["doc_id"] == 10
         assert result["cluster_opinions"] == [{"id": 10}]
 
@@ -493,7 +493,7 @@ class TestSearchDocumentClusterId:
             ),
             pytest.raises(ValueError, match="no opinions"),
         ):
-            run(tool({"cluster_id": 7, "query": "x"}, None))
+            run(tool.call({"cluster_id": 7, "query": "x"}))
 
     def test_schema_accepts_cluster_id(self):
         MCP_TOOLS["search_document"].validate_arguments(
@@ -513,16 +513,14 @@ class TestSearchDocumentClusterId:
         with patch.object(
             SearchDocumentTool, "get_client", return_value=client
         ):
-            result = run(
-                tool({"opinion_id": [10, 11], "query": "alpha"}, None)
-            )
+            result = run(tool.call({"opinion_id": [10, 11], "query": "alpha"}))
         assert [r["doc_id"] for r in result["results"]] == [10, 11]
 
     def test_rejects_multiple_id_kinds(self):
         with pytest.raises(ToolArgumentValidationError, match="exactly one"):
             run(
-                SearchDocumentTool()(
-                    {"opinion_id": 1, "cluster_id": 2, "query": "x"}, None
+                SearchDocumentTool().call(
+                    {"opinion_id": 1, "cluster_id": 2, "query": "x"}
                 )
             )
 
@@ -537,7 +535,7 @@ class TestAnalyzeCitationsClusterId:
             ),
             pytest.raises(ValueError, match="cluster_id"),
         ):
-            run(tool({"opinion_id": 1}, None))
+            run(tool.call({"opinion_id": 1}))
 
     def test_schema_accepts_cluster_id(self):
         MCP_TOOLS["analyze_citations"].validate_arguments({"cluster_id": 123})
@@ -545,9 +543,7 @@ class TestAnalyzeCitationsClusterId:
     def test_rejects_multiple_id_kinds(self):
         with pytest.raises(ToolArgumentValidationError, match="exactly one"):
             run(
-                AnalyzeCitationsTool()(
-                    {"opinion_id": 1, "cluster_id": 2}, None
-                )
+                AnalyzeCitationsTool().call({"opinion_id": 1, "cluster_id": 2})
             )
 
     def test_cluster_id_analyzes_the_main_opinion(self):
@@ -561,7 +557,7 @@ class TestAnalyzeCitationsClusterId:
         with patch.object(
             AnalyzeCitationsTool, "get_client", return_value=client
         ):
-            output = run(tool({"cluster_id": 5}, None))
+            output = run(tool.call({"cluster_id": 5}))
         client.opinions.get.assert_called_once_with(10)
         assert "the main opinion of 2 in cluster 5" in output
         assert "opinion_id: 11" in output
@@ -576,7 +572,7 @@ class TestAnalyzeCitationsClusterId:
         with patch.object(
             AnalyzeCitationsTool, "get_client", return_value=client
         ):
-            output = run(tool({"cluster_id": 5}, None))
+            output = run(tool.call({"cluster_id": 5}))
         assert output == "No citations found."
 
     def test_empty_cluster_raises(self):
@@ -588,4 +584,4 @@ class TestAnalyzeCitationsClusterId:
             ),
             pytest.raises(ValueError, match="no opinions"),
         ):
-            run(tool({"cluster_id": 5}, None))
+            run(tool.call({"cluster_id": 5}))

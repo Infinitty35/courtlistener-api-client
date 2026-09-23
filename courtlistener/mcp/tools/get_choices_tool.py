@@ -1,6 +1,5 @@
 from typing import Literal, get_args, get_origin
 
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.exceptions import ToolArgumentValidationError
@@ -37,7 +36,7 @@ class GetChoicesTool(MCPTool):
     """
 
     name: str = "get_choices"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Get Field Choices",
         readOnlyHint=True,
         destructiveHint=False,
@@ -62,9 +61,7 @@ class GetChoicesTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(
-        self, arguments: dict, ctx: Context
-    ) -> dict[str, list[dict] | str]:
+    async def call(self, arguments: dict) -> dict[str, list[dict] | str]:
         endpoint_id: str = arguments["endpoint_id"]
         field_name: str = arguments["field_name"]
 
@@ -135,5 +132,5 @@ class GetChoicesTool(MCPTool):
             return {"choices": choices}
 
         # Unreachable: the schema's endpoint_id enum is validated in
-        # ToolHandlerMiddleware before dispatch. Guards the fall-through.
+        # `MCPTool.run` before dispatch. Guards the fall-through.
         raise ValueError(f"Endpoint '{endpoint_id}' not found")

@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.mcp_tool import MCPTool
@@ -13,7 +12,7 @@ class GetEndpointItemTool(MCPTool):
     """Get an item by ID from a CourtListener API endpoint."""
 
     name: str = "get_endpoint_item"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Get Item by ID",
         readOnlyHint=True,
         destructiveHint=False,
@@ -54,7 +53,7 @@ class GetEndpointItemTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> dict:
+    async def call(self, arguments: dict) -> dict:
         """Call the get_endpoint_item tool."""
         endpoint_id = arguments.get("endpoint_id")
         item_id = arguments.get("item_id")
@@ -68,5 +67,5 @@ class GetEndpointItemTool(MCPTool):
                     return item
 
         # Unreachable: the schema's endpoint_id enum is validated in
-        # ToolHandlerMiddleware before dispatch. Guards the fall-through.
+        # `MCPTool.run` before dispatch. Guards the fall-through.
         raise ValueError(f"Endpoint '{endpoint_id}' not found")

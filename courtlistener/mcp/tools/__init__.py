@@ -35,26 +35,27 @@ from courtlistener.mcp.tools.unsubscribe_from_docket_alert_tool import (
 )
 from courtlistener.mcp.tools.withdraw_prayer_tool import WithdrawPrayerTool
 
-mcp_tool_registry: list[type[MCPTool]] = [
-    SearchTool,
-    GetEndpointSchemaTool,
-    CallEndpointTool,
-    GetEndpointItemTool,
-    GetChoicesTool,
-    GetCountsTool,
-    GetMoreResultsTool,
-    ReadDocumentTool,
-    SearchDocumentTool,
-    ExtractCitationsTool,
-    AnalyzeCitationsTool,
-    ResumeCitationAnalysisTool,
-    CreateSearchAlertTool,
-    DeleteSearchAlertTool,
-    SubscribeToDocketAlertTool,
-    UnsubscribeFromDocketAlertTool,
-    PrayForDocumentTool,
-    WithdrawPrayerTool,
-    GetApiUsageTool,
-]
-
-MCP_TOOLS = {mcp_tool.name: mcp_tool() for mcp_tool in mcp_tool_registry}
+MCP_TOOLS: dict[str, MCPTool] = {
+    tool.name: tool
+    for tool in [
+        SearchTool(),
+        GetEndpointSchemaTool(),
+        CallEndpointTool(),
+        GetEndpointItemTool(),
+        GetChoicesTool(),
+        GetCountsTool(),
+        GetMoreResultsTool(),
+        ReadDocumentTool(),
+        SearchDocumentTool(),
+        ExtractCitationsTool(),
+        AnalyzeCitationsTool(),
+        ResumeCitationAnalysisTool(),
+        CreateSearchAlertTool(),
+        DeleteSearchAlertTool(),
+        SubscribeToDocketAlertTool(),
+        UnsubscribeFromDocketAlertTool(),
+        PrayForDocumentTool(),
+        WithdrawPrayerTool(),
+        GetApiUsageTool(),
+    ]
+}

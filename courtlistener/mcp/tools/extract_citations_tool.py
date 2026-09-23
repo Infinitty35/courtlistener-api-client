@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from eyecite import get_citations, resolve_citations
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.citation_utils import (
@@ -25,7 +24,7 @@ class ExtractCitationsTool(MCPTool):
     """
 
     name: str = "extract_citations"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Extract Citations",
         readOnlyHint=True,
         destructiveHint=False,
@@ -54,7 +53,7 @@ class ExtractCitationsTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> str:
+    async def call(self, arguments: dict) -> str:
         text = arguments["text"]
         resolve = arguments.get("resolve", True)
 

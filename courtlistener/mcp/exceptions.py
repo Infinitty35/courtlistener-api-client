@@ -1,9 +1,14 @@
+import logging
+
 from fastmcp.exceptions import ToolError
 from pydantic import ValidationError
 
 
 class SentryExemptToolError(ToolError):
     """A `ToolError` triaged as known noise; not reported to Sentry."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message, log_level=logging.INFO)
 
 
 class ToolArgumentValidationError(ToolError):
@@ -12,7 +17,7 @@ class ToolArgumentValidationError(ToolError):
     def __init__(
         self, message: str, tool_name: str, argument_names: list[str]
     ) -> None:
-        super().__init__(message)
+        super().__init__(message, log_level=logging.WARNING)
         self.tool_name = tool_name
         self.argument_names = argument_names
 
@@ -31,7 +36,7 @@ class SessionDataNotFoundError(ToolError):
     def __init__(
         self, message: str, tool_name: str, argument_name: str
     ) -> None:
-        super().__init__(message)
+        super().__init__(message, log_level=logging.WARNING)
         self.tool_name = tool_name
         self.argument_name = argument_name
 

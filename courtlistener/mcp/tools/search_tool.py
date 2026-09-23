@@ -1,6 +1,5 @@
 from typing import Any
 
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.settings import (
@@ -32,7 +31,7 @@ class SearchTool(MCPTool):
     """
 
     name: str = "search"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Search",
         readOnlyHint=True,
         destructiveHint=False,
@@ -106,7 +105,7 @@ class SearchTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> Any:
+    async def call(self, arguments: dict) -> Any:
         """Call the search tool."""
         async with self.get_client() as client:
             fields = normalize_fields(arguments.pop("fields", None))

@@ -1,6 +1,5 @@
 from typing import Any
 
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.mcp_tool import MCPTool
@@ -44,7 +43,7 @@ class GetApiUsageTool(MCPTool):
     """
 
     name: str = "get_api_usage"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Get API Usage",
         readOnlyHint=True,
         destructiveHint=False,
@@ -59,7 +58,7 @@ class GetApiUsageTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> dict[str, Any]:
+    async def call(self, arguments: dict) -> dict[str, Any]:
         async with self.get_client() as client:
             usage = await client.api_usage.get()
 

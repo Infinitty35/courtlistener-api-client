@@ -1,9 +1,8 @@
 """Tool-argument validation and endpoint-ID guidance.
 
-The middleware dispatches to tools directly, so FastMCP never validates
-arguments against the schemas we publish (it only validates tools built
-from a Python signature). ``MCPTool.validate_arguments`` closes that
-gap; the middleware calls it before every dispatch.
+FastMCP only validates arguments for tools built from a Python
+signature, so ``MCPTool.validate_arguments`` checks them against the
+schema we publish; ``MCPTool.run`` calls it before every dispatch.
 
 Covers the Sentry cluster diagnosed July 2026: a misnamed argument
 (``endpoint`` for ``endpoint_id``) surfaced as "Endpoint 'None' not

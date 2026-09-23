@@ -47,9 +47,11 @@ class TestDeleteSearchAlertErrors:
             404, {"detail": "No Alert matches the given query."}
         )
         tool = DeleteSearchAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
-        result = await tool({"id": 99999999}, ctx=MagicMock())
+        result = await tool.call({"id": 99999999})
 
         assert result == "No alert found with id 99999999."
 
@@ -58,10 +60,12 @@ class TestDeleteSearchAlertErrors:
         client = AsyncMock()
         client.alerts.delete.side_effect = _api_error(500, "boom")
         tool = DeleteSearchAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
         with pytest.raises(CourtListenerAPIError) as exc_info:
-            await tool({"id": 1}, ctx=MagicMock())
+            await tool.call({"id": 1})
         assert exc_info.value.status_code == 500
 
     @pytest.mark.asyncio
@@ -69,9 +73,11 @@ class TestDeleteSearchAlertErrors:
         client = AsyncMock()
         client.alerts.delete.return_value = None
         tool = DeleteSearchAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
-        result = await tool({"id": 42}, ctx=MagicMock())
+        result = await tool.call({"id": 42})
 
         assert result == "Deleted search alert 42."
 
@@ -93,9 +99,11 @@ class TestSubscribeToDocketAlertErrors:
         client = AsyncMock()
         client.docket_alerts.subscribe.return_value = existing
         tool = SubscribeToDocketAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
-        result = await tool({"docket": 73209323}, ctx=MagicMock())
+        result = await tool.call({"docket": 73209323})
 
         assert result == existing
 
@@ -105,9 +113,11 @@ class TestSubscribeToDocketAlertErrors:
         client = AsyncMock()
         client.docket_alerts.subscribe.side_effect = _api_error(400, detail)
         tool = SubscribeToDocketAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
-        result = await tool({"docket": 1}, ctx=MagicMock())
+        result = await tool.call({"docket": 1})
 
         assert isinstance(result, str)
         assert result.startswith("Could not subscribe to docket 1:")
@@ -119,10 +129,12 @@ class TestSubscribeToDocketAlertErrors:
         client = AsyncMock()
         client.docket_alerts.subscribe.side_effect = _api_error(500, "boom")
         tool = SubscribeToDocketAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
         with pytest.raises(CourtListenerAPIError) as exc_info:
-            await tool({"docket": 1}, ctx=MagicMock())
+            await tool.call({"docket": 1})
         assert exc_info.value.status_code == 500
 
     @pytest.mark.asyncio
@@ -131,9 +143,11 @@ class TestSubscribeToDocketAlertErrors:
         client = AsyncMock()
         client.docket_alerts.subscribe.return_value = alert
         tool = SubscribeToDocketAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
-        result = await tool({"docket": 1}, ctx=MagicMock())
+        result = await tool.call({"docket": 1})
 
         assert result == alert
 
@@ -146,11 +160,12 @@ class TestCreateSearchAlertErrors:
             400, {"query": ["Invalid query syntax."]}
         )
         tool = CreateSearchAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
-        result = await tool(
+        result = await tool.call(
             {"name": "x", "query": "q=foo", "rate": "off"},
-            ctx=MagicMock(),
         )
 
         assert isinstance(result, str)
@@ -162,11 +177,12 @@ class TestCreateSearchAlertErrors:
         client = AsyncMock()
         client.alerts.create.side_effect = _api_error(500, "boom")
         tool = CreateSearchAlertTool()
-        monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+        monkeypatch.setattr(
+            type(tool), "get_client", lambda self: _client_cm(client)
+        )
 
         with pytest.raises(CourtListenerAPIError) as exc_info:
-            await tool(
+            await tool.call(
                 {"name": "x", "query": "q=foo", "rate": "off"},
-                ctx=MagicMock(),
             )
         assert exc_info.value.status_code == 500

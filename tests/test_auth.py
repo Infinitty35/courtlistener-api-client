@@ -87,9 +87,9 @@ class TestMCPToolGetClient:
 
     def _get_tool(self):
         # Import lazily so tests don't require optional MCP deps to load.
-        from courtlistener.mcp.tools.mcp_tool import MCPTool
+        from courtlistener.mcp.tools import MCP_TOOLS
 
-        return MCPTool()
+        return MCP_TOOLS["get_counts"]
 
     def _verified(self, token, **claims):
         access_token = MagicMock()

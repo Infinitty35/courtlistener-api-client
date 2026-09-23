@@ -1,7 +1,6 @@
 import base64
 
 from fastmcp import FastMCP
-from fastmcp.server.middleware.caching import ResponseCachingMiddleware
 from key_value.aio.stores.redis import RedisStore
 from mcp.types import Icon
 from pydantic import AnyHttpUrl
@@ -18,7 +17,6 @@ from courtlistener.mcp.auth import (
     CourtListenerAuthProvider,
     CourtListenerTokenVerifier,
 )
-from courtlistener.mcp.middleware import ToolHandlerMiddleware
 from courtlistener.mcp.prompts import GLOBAL_INSTRUCTIONS
 from courtlistener.mcp.settings import (
     BASE_DIR,
@@ -28,6 +26,7 @@ from courtlistener.mcp.settings import (
     OPENAI_APPS_CHALLENGE_TOKEN,
     REDIS_URL,
 )
+from courtlistener.mcp.tools import MCP_TOOLS
 
 
 def create_mcp_server(**kwargs):
@@ -61,17 +60,11 @@ def create_mcp_server(**kwargs):
                 sizes=["180x180"],
             ),
         ],
+        tools=list(MCP_TOOLS.values()),
+        # Tools validate their own arguments; see MCPTool.validate_arguments.
+        strict_input_validation=False,
         **kwargs,
     )
-
-    redis_store = kwargs.get("session_state_store")
-
-    mcp.add_middleware(ToolHandlerMiddleware())
-
-    if redis_store is not None:
-        mcp.add_middleware(
-            ResponseCachingMiddleware(cache_storage=redis_store)
-        )
 
     # Static asset routes
     @mcp.custom_route("/favicon.svg", methods=["GET"])

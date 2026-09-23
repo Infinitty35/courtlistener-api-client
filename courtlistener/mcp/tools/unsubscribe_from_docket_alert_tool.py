@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.mcp_tool import MCPTool
@@ -15,7 +14,7 @@ class UnsubscribeFromDocketAlertTool(MCPTool):
     """
 
     name: str = "unsubscribe_from_docket_alert"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Unsubscribe from Docket Alert",
         readOnlyHint=False,
         destructiveHint=True,
@@ -36,7 +35,7 @@ class UnsubscribeFromDocketAlertTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> str:
+    async def call(self, arguments: dict) -> str:
         docket = arguments["docket"]
 
         async with self.get_client() as client:

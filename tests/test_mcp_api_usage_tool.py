@@ -48,7 +48,9 @@ def _tool(monkeypatch, payload=PAYLOAD):
     client = AsyncMock()
     client.api_usage.get.return_value = payload
     tool = GetApiUsageTool()
-    monkeypatch.setattr(tool, "get_client", lambda: _client_cm(client))
+    monkeypatch.setattr(
+        type(tool), "get_client", lambda self: _client_cm(client)
+    )
     return tool
 
 
@@ -56,7 +58,7 @@ class TestGetApiUsage:
     pytestmark = pytest.mark.asyncio
 
     async def test_groups_scopes_with_user_first(self, monkeypatch):
-        result = await _tool(monkeypatch)({}, ctx=MagicMock())
+        result = await _tool(monkeypatch).call({})
 
         assert list(result["current_usage"]) == [
             "user",
@@ -70,14 +72,14 @@ class TestGetApiUsage:
         assert "ignore" in result["current_usage"]["api_usage"]["description"]
 
     async def test_summary_reads_from_user_scope(self, monkeypatch):
-        result = await _tool(monkeypatch)({}, ctx=MagicMock())
+        result = await _tool(monkeypatch).call({})
 
         assert result["summary"].startswith("4988 of 5000 API requests")
         assert "5000/hour" in result["summary"]
         assert "10/min" not in result["summary"]
 
     async def test_passes_history_and_membership_through(self, monkeypatch):
-        result = await _tool(monkeypatch)({}, ctx=MagicMock())
+        result = await _tool(monkeypatch).call({})
 
         assert result["historical_usage"] == PAYLOAD["historical_usage"]
         assert result["membership"] is None
@@ -87,7 +89,7 @@ class TestGetApiUsage:
             **PAYLOAD,
             "current_usage": [_row("future", "1/min", 0, 1)],
         }
-        result = await _tool(monkeypatch, payload)({}, ctx=MagicMock())
+        result = await _tool(monkeypatch, payload).call({})
 
         assert list(result["current_usage"]) == ["future"]
         assert result["summary"].startswith("No main API quota")
