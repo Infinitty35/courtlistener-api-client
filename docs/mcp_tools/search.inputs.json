@@ -34,7 +34,8 @@
           "type": "null"
         }
       ],
-      "description": "Valid choices:\n\n[\n  {\n    \"display_name\": \"Opinion\",\n    \"value\": \"o\"\n  },\n  {\n    \"display_name\": \"Recap\",\n    \"value\": \"r\"\n  },\n  {\n    \"display_name\": \"Document\",\n    \"value\": \"rd\"\n  },\n  {\n    \"display_name\": \"Docket\",\n    \"value\": \"d\"\n  },\n  {\n    \"display_name\": \"Judge\",\n    \"value\": \"p\"\n  },\n  {\n    \"display_name\": \"Oral Argument\",\n    \"value\": \"oa\"\n  }\n]"
+      "description": "Search type. Defaults to `o` (Opinion).\n\nValid choices:\n\n[\n  {\n    \"display_name\": \"Opinion\",\n    \"value\": \"o\"\n  },\n  {\n    \"display_name\": \"Recap\",\n    \"value\": \"r\"\n  },\n  {\n    \"display_name\": \"Document\",\n    \"value\": \"rd\"\n  },\n  {\n    \"display_name\": \"Docket\",\n    \"value\": \"d\"\n  },\n  {\n    \"display_name\": \"Judge\",\n    \"value\": \"p\"\n  },\n  {\n    \"display_name\": \"Oral Argument\",\n    \"value\": \"oa\"\n  }\n]",
+      "default": "o"
     },
     "court": {
       "anyOf": [
@@ -548,8 +549,5 @@
       "description": "Valid when type in: ['o', 'r', 'rd', 'd', 'p', 'oa']\n\nValid choices:\n\n[\n  {\n    \"display_name\": \"Relevance\",\n    \"value\": \"score desc\"\n  },\n  {\n    \"display_name\": \"Newest Cases First\",\n    \"value\": \"dateFiled desc\"\n  },\n  {\n    \"display_name\": \"Oldest Cases First\",\n    \"value\": \"dateFiled asc\"\n  },\n  {\n    \"display_name\": \"Most Cited First\",\n    \"value\": \"citeCount desc\"\n  },\n  {\n    \"display_name\": \"Least Cited First\",\n    \"value\": \"citeCount asc\"\n  },\n  {\n    \"display_name\": \"Newest Documents First\",\n    \"value\": \"entry_date_filed desc\"\n  },\n  {\n    \"display_name\": \"Oldest Documents First\",\n    \"value\": \"entry_date_filed asc\"\n  },\n  {\n    \"display_name\": \"Last Name\",\n    \"value\": \"name_reverse asc\"\n  },\n  {\n    \"display_name\": \"Most Recently Born\",\n    \"value\": \"dob desc,name_reverse asc\"\n  },\n  {\n    \"display_name\": \"Least Recently Born\",\n    \"value\": \"dob asc,name_reverse asc\"\n  },\n  {\n    \"display_name\": \"Most Recently Deceased\",\n    \"value\": \"dod desc,name_reverse asc\"\n  },\n  {\n    \"display_name\": \"Newest First\",\n    \"value\": \"dateArgued desc\"\n  },\n  {\n    \"display_name\": \"Oldest First\",\n    \"value\": \"dateArgued asc\"\n  }\n]"
     }
   },
-  "required": [
-    "type"
-  ],
   "additionalProperties": false
 }
