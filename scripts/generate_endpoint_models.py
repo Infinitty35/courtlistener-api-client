@@ -452,6 +452,8 @@ def load_search_options():
         else:
             type_filter = {
                 "type": "ChoiceFilter",
+                "default": "o",
+                "description": "Search type. Defaults to `o` (Opinion).",
                 "choices": [
                     {
                         "value": "o",
@@ -727,6 +729,7 @@ def get_endpoint_data(use_cache: bool = True) -> dict[str, Any]:
                 "validators": validators,
                 "filter_class": None,
                 "literal_value": filter.get("literal_value"),
+                "default": filter.get("default"),
             }
         name = options.get("name") or endpoint_id.replace("-", " ").title()
         description = options.get("description") or f"{name} Endpoint"
