@@ -7,14 +7,21 @@ the server through a real client session.
 """
 
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
 from fastmcp import Client
+from fastmcp.client.transports import StreamableHttpTransport
 
+import courtlistener.mcp.server as server_mod
 from courtlistener.exceptions import CourtListenerAPIError
 from courtlistener.mcp.server import create_mcp_server
+from courtlistener.mcp.session import (
+    InMemorySession,
+    RedisSession,
+    set_session,
+)
 from courtlistener.mcp.tools import MCP_TOOLS
 from courtlistener.mcp.tools.get_counts_tool import GetCountsTool
 
@@ -92,3 +99,81 @@ class TestCallTool:
 
         assert result.is_error
         assert "Unknown tool" in result.content[0].text
+
+
+class TestHttpApp:
+    """The HTTP app serves the same tools behind the dual-scheme auth."""
+
+    @pytest.fixture(autouse=True)
+    def session(self):
+        set_session(InMemorySession())
+        yield
+        set_session(None)
+
+    @pytest.fixture
+    def app(self):
+        with (
+            patch.object(server_mod, "REDIS_URL", "redis://unused"),
+            patch(
+                "courtlistener.mcp.auth.verify_api_token",
+                new=AsyncMock(return_value={"user_hash": "h"}),
+            ),
+        ):
+            yield server_mod.create_http_app()
+
+    def _http(self, app):
+        return httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app),
+            base_url="http://testserver",
+        )
+
+    async def test_rejects_requests_without_a_credential(self, app):
+        async with app.router.lifespan_context(app), self._http(app) as http:
+            response = await http.post(
+                "/",
+                json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
+                headers={"Accept": "application/json, text/event-stream"},
+            )
+
+        assert response.status_code == 401
+        assert "resource_metadata=" in response.headers["www-authenticate"]
+
+    async def test_serves_tools_to_an_api_token_client(self, app):
+        def factory(headers=None, timeout=None, auth=None, **kwargs):
+            return httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app),
+                base_url="http://testserver",
+                headers=headers,
+                timeout=timeout,
+                auth=auth,
+                follow_redirects=True,
+            )
+
+        transport = StreamableHttpTransport(
+            "http://testserver/",
+            headers={"Authorization": "Token cl-api-token"},
+            httpx_client_factory=factory,
+        )
+        async with (
+            app.router.lifespan_context(app),
+            Client(transport) as client,
+        ):
+            listed = await client.list_tools()
+            result = await client.call_tool(
+                "get_endpoint_schema", {"endpoint_id": "courts"}
+            )
+
+        assert [tool.name for tool in listed] == list(MCP_TOOLS)
+        assert "id" in json.loads(result.content[0].text)["properties"]
+
+    async def test_health_reports_the_session_store(self, app):
+        session = RedisSession("redis://example.test:6379")
+        session._client = MagicMock(ping=AsyncMock(return_value=True))
+        set_session(session)
+
+        async with app.router.lifespan_context(app), self._http(app) as http:
+            response = await http.get("/health")
+
+        body = response.json()
+        assert body["status"] == "healthy"
+        assert body["services"] == {"mcp": True, "redis": True}

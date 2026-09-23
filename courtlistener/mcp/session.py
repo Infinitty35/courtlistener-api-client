@@ -5,10 +5,10 @@ import hmac
 import json
 import logging
 import time
-from collections.abc import Iterator
+from collections.abc import Awaitable, Iterator
 from contextlib import contextmanager
 from datetime import date, datetime
-from typing import Any
+from typing import Any, cast
 
 import redis.asyncio as redis
 from fastmcp.server.dependencies import get_access_token
@@ -183,6 +183,11 @@ class RedisSession(Session):
     async def _delete(self, key: str) -> None:
         with degrade_on_connection_error("delete"):
             await self.client.delete(key)
+
+    async def ping(self) -> bool:
+        with degrade_on_connection_error("ping"):
+            return bool(await cast("Awaitable[bool]", self.client.ping()))
+        return False
 
 
 class InMemorySession(Session):
