@@ -125,6 +125,16 @@ class TestValidateArguments:
             {"endpoint_id": "search", "field_name": "court"},
         )
 
+    def test_search_type_is_optional_and_defaults_to_opinions(self):
+        schema = MCP_TOOLS["search"].get_input_schema()
+        assert "type" not in schema.get("required", [])
+        assert schema["properties"]["type"]["default"] == "o"
+        MCP_TOOLS["search"].validate_arguments({"q": "test"})
+
+    def test_search_endpoint_type_defaults_to_opinions(self):
+        assert ENDPOINTS["search"]().type == "o"
+        assert ENDPOINTS["search"](type="r").type == "r"
+
 
 class TestExplicitNullArguments:
     @pytest.mark.parametrize(

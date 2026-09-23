@@ -42,7 +42,7 @@ class {{ endpoint.class_name }}(Endpoint):
     {{ field.id }}: Annotated[
         None | {{ field.types_str }}{% if field.filter_class %} | {{ field.filter_class }}{% endif %}{% if field.related_id_types_str %} | {{ field.related_id_types_str }}{% endif %},
         Field(
-            None,
+            {% if field.default is not none %}{{ field.default | tojson }}{% else %}None{% endif %},
             {% if field.description %}
             description={{ field.description | tojson }},
             {% endif %}

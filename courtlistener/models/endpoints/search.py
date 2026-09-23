@@ -29,7 +29,8 @@ class SearchEndpoint(Endpoint):
     type: Annotated[
         None | str,
         Field(
-            None,
+            "o",
+            description="Search type. Defaults to `o` (Opinion).",
             json_schema_extra={
                 "choices": [
                     {"value": "o", "display_name": "Opinion"},

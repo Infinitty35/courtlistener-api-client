@@ -17,7 +17,9 @@ Search Endpoint
 
 ### `type`
 
-string
+string · default: `"o"`
+
+Search type. Defaults to `o` (Opinion).
 
 Choices (6):
 

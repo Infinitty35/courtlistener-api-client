@@ -91,15 +91,18 @@ class SearchTool(MCPTool):
                     + "\n\n"
                     + f"Valid when type in: {search_types}"
                 ).strip()
-            updated_properties[filter_name] = prepare_filter(
+            default = filter.get("default")
+            prepared = prepare_filter(
                 filter,
                 endpoint_id="search",
                 field_name=filter_name,
             )
+            if default is not None:
+                prepared["default"] = default
+            updated_properties[filter_name] = prepared
         return {
             "type": "object",
             "properties": updated_properties,
-            "required": ["type"],
             "additionalProperties": False,
         }
 

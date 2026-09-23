@@ -5,8 +5,8 @@
 **Search**
 
 - **Source:** `courtlistener/mcp/tools/search_tool.py`
-- **Estimated definition size:** ~3283 tokens (description ~78, input schema ~3130; cl100k_base)
-- **Parameters:** 46 (1 required)
+- **Estimated definition size:** ~3296 tokens (description ~78, input schema ~3143; cl100k_base)
+- **Parameters:** 46 (0 required)
 - **Raw input schema:** [`search.inputs.json`](./search.inputs.json)
 
 ## Description
@@ -45,7 +45,9 @@ Number of results to return (1-100). Defaults to 20.
 
 ### `type`
 
-string | null · **required**
+string | null · optional · default: `"o"`
+
+Search type. Defaults to `o` (Opinion).
 
 Valid choices:
 

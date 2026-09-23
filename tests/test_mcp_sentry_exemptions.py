@@ -290,8 +290,8 @@ class TestToolArgumentFingerprint:
     def test_missing_required_names_the_argument(self):
         # `required` violations also have an empty error.path; the
         # missing names come from the schema's required list.
-        exc = self._error_for("search", {"q": "test"})
-        assert exc.argument_names == ["type"]
+        exc = self._error_for("get_more_results", {})
+        assert exc.argument_names == ["query_id"]
 
     def test_bad_value_names_the_argument(self):
         exc = self._error_for("search", {"type": "o", "fields": 123})
@@ -310,11 +310,11 @@ class TestToolArgumentFingerprint:
     def test_multiple_arguments_join_in_field_tag(self):
         from courtlistener.mcp.exceptions import before_send
 
-        exc = self._error_for("search", {"query": {}, "fields": 123})
+        exc = self._error_for("get_more_results", {"query": {}})
         event = {}
         before_send(event, {"exc_info": (type(exc), exc, None)})
-        assert event["tags"]["tool"] == "search"
-        assert event["tags"]["field"] == "fields,query,type"
+        assert event["tags"]["tool"] == "get_more_results"
+        assert event["tags"]["field"] == "query,query_id"
 
 
 class TestUnauthorizedFingerprint:
