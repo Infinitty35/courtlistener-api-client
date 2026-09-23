@@ -37,6 +37,8 @@ def flatten_filters(
 
         if isinstance(value, dict):
             result.update(flatten_filters(value, full_key))
+        elif key == "range" and isinstance(value, (list, tuple)):
+            result[full_key] = ",".join(str(v) for v in value)
         else:
             result[full_key] = value
 
