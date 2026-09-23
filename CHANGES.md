@@ -31,6 +31,7 @@ Changes:
 - Remove `comma_separated_pre_validator`, now redundant as `multiple_choice_validator` already splits on commas and whitespace, and splitting up front broke choice labels containing a comma (`"District Court, D. Alaska"`).
 
 Fix:
+- Fix `range` lookups (e.g. `date_filed__range=["2020-01-01", "2020-12-31"]`) being sent as repeated query params, which CourtListener rejected with "Range query expects two values." They are now joined into one comma-separated value. Affects every `range` lookup on every endpoint.
 - Fix `generate_models.py` dropping `filter_class` 0.
 - Fix search's `court` filter mislabeled as `MultipleChoiceFilter` when should be `MultipleChoiceStringFilter`.
 
