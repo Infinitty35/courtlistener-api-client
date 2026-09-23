@@ -243,10 +243,8 @@ def main() -> None:
 
     expected_files = set()
     for name, mcp_tool in MCP_TOOLS.items():
-        tool_entry = (
-            mcp_tool.get_tool()
-            .to_mcp_tool()
-            .model_dump(by_alias=True, exclude_none=True, mode="json")
+        tool_entry = mcp_tool.to_mcp_tool().model_dump(
+            by_alias=True, exclude_none=True, mode="json"
         )
         source = mcp_tool.__class__.__module__.replace(".", "/") + ".py"
 

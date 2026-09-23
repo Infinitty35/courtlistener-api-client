@@ -183,7 +183,7 @@ These tools modify your CourtListener account state. Your client should prompt y
 
 ## Usage notes and limits
 
-- **Rate limits.** Usage is bounded by CourtListener's API rate limits; see [the API docs](https://www.courtlistener.com/help/api/rest/) for current values. The MCP server itself adds short-lived response caching for read tools to reduce duplicate calls within a session.
+- **Rate limits.** Usage is bounded by CourtListener's API rate limits; see [the API docs](https://www.courtlistener.com/help/api/rest/) for current values.
 - **Result size.** Search and list tools return up to 100 items per call (default 20). Use `get_more_results` to page through larger result sets.
 - **Citation analysis batching.** `analyze_citations` verifies up to ~250 unique citations per call to stay under request budgets. Anything larger returns a `job_id`; call `resume_citation_analysis` to continue.
 - **Field filtering.** Most read tools accept a `fields` parameter to return only the columns you need, which keeps tool output compact and helps the model focus on what matters.

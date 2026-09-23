@@ -87,9 +87,9 @@ class TestMCPToolGetClient:
 
     def _get_tool(self):
         # Import lazily so tests don't require optional MCP deps to load.
-        from courtlistener.mcp.tools.mcp_tool import MCPTool
+        from courtlistener.mcp.tools import MCP_TOOLS
 
-        return MCPTool()
+        return MCP_TOOLS["get_counts"]
 
     def _verified(self, token, **claims):
         access_token = MagicMock()
@@ -410,7 +410,6 @@ class TestServerAuthWiring:
         which fail-opened: any value other than exactly "true" silently
         deployed an unauthenticated server. The factory now wires auth
         with no conditional at all, and the setting itself is gone."""
-        from key_value.aio.stores.memory import MemoryStore
         from starlette.middleware.authentication import (
             AuthenticationMiddleware,
         )
@@ -422,7 +421,6 @@ class TestServerAuthWiring:
         with (
             patch.dict("os.environ", {"MCP_REQUIRE_OAUTH": "false"}),
             patch.object(server_mod, "REDIS_URL", "redis://localhost:6379"),
-            patch.object(server_mod, "RedisStore", lambda url: MemoryStore()),
         ):
             app = server_mod.create_http_app()
         assert AuthenticationMiddleware in [
@@ -893,9 +891,9 @@ class TestHealthEndpoint:
 
         from courtlistener.mcp.server import create_mcp_server
 
-        # Skip the RedisStore wiring (create_http_app requires Redis);
-        # we only care that /health routes through FastMCP's starlette
-        # app unauthenticated, with the same provider attached.
+        # Skip create_http_app (it requires REDIS_URL); we only care
+        # that /health routes through FastMCP's starlette app
+        # unauthenticated, with the same provider attached.
         mcp = create_mcp_server(auth=_auth_provider())
 
         app = mcp.http_app(path="/")

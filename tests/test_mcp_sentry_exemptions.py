@@ -14,6 +14,7 @@ from unittest.mock import AsyncMock, MagicMock
 import httpx
 import pytest
 from fastmcp.exceptions import ToolError
+from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
 from courtlistener.mcp.exceptions import (
@@ -22,7 +23,6 @@ from courtlistener.mcp.exceptions import (
     UpstreamCourtListenerError,
     before_send,
 )
-from courtlistener.mcp.middleware import ToolHandlerMiddleware
 from courtlistener.mcp.tools.mcp_tool import MCPTool
 
 
@@ -32,35 +32,28 @@ def _api_error(status_code: int, detail) -> CourtListenerAPIError:
     return CourtListenerAPIError(status_code, detail, response)
 
 
-async def _call_tool_raising(monkeypatch, exc, tool_name="fake_tool"):
+async def _run_tool_raising(exc, tool_name="fake_tool"):
     class FakeTool(MCPTool):
-        name = tool_name
+        name: str = tool_name
+        annotations: ToolAnnotations = ToolAnnotations(title="Fake")
 
         def get_input_schema(self) -> dict:
             return {"type": "object", "properties": {}}
 
-        async def __call__(self, arguments, ctx):
+        async def call(self, arguments):
             raise exc
 
-    monkeypatch.setattr(
-        "courtlistener.mcp.middleware.MCP_TOOLS", {tool_name: FakeTool()}
-    )
-    context = MagicMock()
-    context.message.name = tool_name
-    context.message.arguments = {}
-    context.fastmcp_context = MagicMock()
-    middleware = ToolHandlerMiddleware()
-    return await middleware.on_call_tool(context, call_next=MagicMock())
+    return await FakeTool().run({})
 
 
-class TestMiddlewareErrorClassification:
+class TestRunErrorClassification:
     @pytest.mark.asyncio
     async def test_429_raises_sentry_exempt_error(self, monkeypatch):
         error = _api_error(
             429, {"detail": "Request was throttled. Rate limit exceeded."}
         )
         with pytest.raises(SentryExemptToolError) as excinfo:
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
         assert "Rate limit exceeded" in str(excinfo.value)
         assert "Call `get_api_usage`" in str(excinfo.value)
         assert "donate.free.law" in str(excinfo.value)
@@ -71,9 +64,7 @@ class TestMiddlewareErrorClassification:
     ):
         error = _api_error(429, {"detail": "Request was throttled."})
         with pytest.raises(SentryExemptToolError) as excinfo:
-            await _call_tool_raising(
-                monkeypatch, error, tool_name="get_api_usage"
-            )
+            await _run_tool_raising(error, tool_name="get_api_usage")
         assert "get_api_usage" not in str(excinfo.value)
         assert "donate.free.law" in str(excinfo.value)
 
@@ -86,12 +77,12 @@ class TestMiddlewareErrorClassification:
             "cached": cached,
         }
         monkeypatch.setattr(
-            "courtlistener.mcp.middleware.get_access_token", lambda: token
+            "courtlistener.mcp.tools.mcp_tool.get_access_token", lambda: token
         )
         session = MagicMock()
         session.invalidate_token = AsyncMock()
         monkeypatch.setattr(
-            "courtlistener.mcp.middleware.get_session", lambda: session
+            "courtlistener.mcp.tools.mcp_tool.get_session", lambda: session
         )
         return session
 
@@ -102,7 +93,7 @@ class TestMiddlewareErrorClassification:
         session = self._fake_access_token(monkeypatch, cached=True)
         error = _api_error(401, {"detail": "Invalid token."})
         with pytest.raises(SentryExemptToolError) as excinfo:
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
         assert "retry to re-authenticate" in str(excinfo.value)
         session.invalidate_token.assert_awaited_once_with("tok", "oauth")
 
@@ -120,7 +111,7 @@ class TestMiddlewareErrorClassification:
         )
         error = _api_error(401, {"detail": "Invalid token."})
         with pytest.raises(SentryExemptToolError):
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
         session.invalidate_token.assert_awaited_once_with("tok", "api_token")
 
     @pytest.mark.asyncio
@@ -130,7 +121,7 @@ class TestMiddlewareErrorClassification:
         self._fake_access_token(monkeypatch, cached=False)
         error = _api_error(401, {"detail": "Invalid token."})
         with pytest.raises(UnauthorizedToolError) as excinfo:
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
         assert excinfo.value.tool_name == "fake_tool"
 
     @pytest.mark.asyncio
@@ -139,13 +130,13 @@ class TestMiddlewareErrorClassification:
         report, conservatively."""
         error = _api_error(401, {"detail": "Invalid token."})
         with pytest.raises(UnauthorizedToolError):
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
 
     @pytest.mark.asyncio
     async def test_upstream_500_raises_typed_error(self, monkeypatch):
         error = _api_error(500, {"detail": "Internal Server Error."})
         with pytest.raises(UpstreamCourtListenerError) as excinfo:
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
         assert excinfo.value.tool_name == "fake_tool"
         assert excinfo.value.status == "500"
 
@@ -153,7 +144,7 @@ class TestMiddlewareErrorClassification:
     async def test_transport_failure_raises_typed_error(self, monkeypatch):
         error = httpx.ConnectError("[Errno 104] Connection reset by peer")
         with pytest.raises(UpstreamCourtListenerError) as excinfo:
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
         assert excinfo.value.status == "connection"
 
     @pytest.mark.asyncio
@@ -161,14 +152,14 @@ class TestMiddlewareErrorClassification:
         self, monkeypatch
     ):
         """The library's fields check is argument validation the input
-        schema can't express; the middleware reclassifies it so it
+        schema can't express; ``MCPTool.run`` reclassifies it so it
         lands in the tool-argument Sentry issue."""
         from courtlistener.exceptions import InvalidFieldsError
         from courtlistener.mcp.exceptions import ToolArgumentValidationError
 
         error = InvalidFieldsError("Invalid fields: ['case_nam'].")
         with pytest.raises(ToolArgumentValidationError) as excinfo:
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
         assert excinfo.value.tool_name == "fake_tool"
         assert excinfo.value.argument_names == ["fields"]
         assert "case_nam" in str(excinfo.value)
@@ -177,7 +168,7 @@ class TestMiddlewareErrorClassification:
     async def test_4xx_stays_plain_tool_error(self, monkeypatch):
         error = _api_error(404, {"detail": "Not found."})
         with pytest.raises(ToolError) as excinfo:
-            await _call_tool_raising(monkeypatch, error)
+            await _run_tool_raising(error)
         assert not isinstance(excinfo.value, UpstreamCourtListenerError)
         assert not isinstance(excinfo.value, SentryExemptToolError)
 

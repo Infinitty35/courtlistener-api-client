@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.mcp_tool import MCPTool
@@ -17,7 +16,7 @@ class WithdrawPrayerTool(MCPTool):
     """
 
     name: str = "withdraw_prayer"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Withdraw Prayer",
         readOnlyHint=False,
         destructiveHint=True,
@@ -40,7 +39,7 @@ class WithdrawPrayerTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> str:
+    async def call(self, arguments: dict) -> str:
         recap_document_id = arguments["recap_document_id"]
 
         async with self.get_client() as client:

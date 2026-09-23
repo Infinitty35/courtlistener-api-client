@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
@@ -12,7 +11,7 @@ class DeleteSearchAlertTool(MCPTool):
     """
 
     name: str = "delete_search_alert"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Delete Search Alert",
         readOnlyHint=False,
         destructiveHint=True,
@@ -33,7 +32,7 @@ class DeleteSearchAlertTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> str:
+    async def call(self, arguments: dict) -> str:
         alert_id = arguments["id"]
 
         async with self.get_client() as client:

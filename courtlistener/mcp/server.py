@@ -1,8 +1,7 @@
 import base64
 
 from fastmcp import FastMCP
-from fastmcp.server.middleware.caching import ResponseCachingMiddleware
-from key_value.aio.stores.redis import RedisStore
+from fastmcp.server.auth import AuthProvider
 from mcp.types import Icon
 from pydantic import AnyHttpUrl
 from starlette.middleware import Middleware
@@ -18,8 +17,8 @@ from courtlistener.mcp.auth import (
     CourtListenerAuthProvider,
     CourtListenerTokenVerifier,
 )
-from courtlistener.mcp.middleware import ToolHandlerMiddleware
 from courtlistener.mcp.prompts import GLOBAL_INSTRUCTIONS
+from courtlistener.mcp.session import RedisSession, get_session
 from courtlistener.mcp.settings import (
     BASE_DIR,
     GIT_SHA,
@@ -28,9 +27,10 @@ from courtlistener.mcp.settings import (
     OPENAI_APPS_CHALLENGE_TOKEN,
     REDIS_URL,
 )
+from courtlistener.mcp.tools import MCP_TOOLS
 
 
-def create_mcp_server(**kwargs):
+def create_mcp_server(auth: AuthProvider | None = None) -> FastMCP:
     assets_dir = BASE_DIR / "mcp" / "assets"
     favicon_svg_path = assets_dir / "favicon.svg"
     favicon_ico_path = assets_dir / "favicon.ico"
@@ -61,17 +61,11 @@ def create_mcp_server(**kwargs):
                 sizes=["180x180"],
             ),
         ],
-        **kwargs,
+        tools=list(MCP_TOOLS.values()),
+        auth=auth,
+        # Tools validate their own arguments; see MCPTool.validate_arguments.
+        strict_input_validation=False,
     )
-
-    redis_store = kwargs.get("session_state_store")
-
-    mcp.add_middleware(ToolHandlerMiddleware())
-
-    if redis_store is not None:
-        mcp.add_middleware(
-            ResponseCachingMiddleware(cache_storage=redis_store)
-        )
 
     # Static asset routes
     @mcp.custom_route("/favicon.svg", methods=["GET"])
@@ -113,9 +107,9 @@ def create_mcp_server(**kwargs):
     async def health_check(request):
         services = {"mcp": True}
 
-        redis_store = kwargs.get("session_state_store")
-        if redis_store is not None:
-            services["redis"] = await redis_store._client.ping()
+        session = get_session()
+        if isinstance(session, RedisSession):
+            services["redis"] = await session.ping()
 
         return JSONResponse(
             {
@@ -151,9 +145,7 @@ async def protected_resource_metadata(request):
 def create_http_app():
     if REDIS_URL is None:
         raise ValueError("REDIS_URL is required for HTTP mode")
-    redis_store = RedisStore(url=REDIS_URL)
     mcp = create_mcp_server(
-        session_state_store=redis_store,
         auth=CourtListenerAuthProvider(
             token_verifier=CourtListenerTokenVerifier(base_url=MCP_BASE_URL),
             authorization_servers=[AnyHttpUrl(OAUTH_ISSUER)],

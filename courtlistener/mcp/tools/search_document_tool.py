@@ -1,6 +1,5 @@
 import re
 
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.exceptions import ToolArgumentValidationError
@@ -36,7 +35,7 @@ class SearchDocumentTool(MCPTool):
     """
 
     name: str = "search_document"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Search Document",
         readOnlyHint=True,
         destructiveHint=False,
@@ -159,7 +158,7 @@ class SearchDocumentTool(MCPTool):
         )
         return result
 
-    async def __call__(self, arguments: dict, ctx: Context) -> dict:
+    async def call(self, arguments: dict) -> dict:
         opinion_id = arguments.get("opinion_id")
         recap_document_id = arguments.get("recap_document_id")
         cluster_id = arguments.get("cluster_id")

@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
@@ -13,7 +12,7 @@ class SubscribeToDocketAlertTool(MCPTool):
     """
 
     name: str = "subscribe_to_docket_alert"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Subscribe to Docket Alert",
         readOnlyHint=False,
         destructiveHint=False,
@@ -34,7 +33,7 @@ class SubscribeToDocketAlertTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> dict | str:
+    async def call(self, arguments: dict) -> dict | str:
         docket = arguments["docket"]
 
         async with self.get_client() as client:

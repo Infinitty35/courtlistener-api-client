@@ -1,6 +1,5 @@
 from typing import Any
 
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.settings import (
@@ -27,7 +26,7 @@ class CallEndpointTool(MCPTool):
     """
 
     name: str = "call_endpoint"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Call API Endpoint",
         readOnlyHint=True,
         destructiveHint=False,
@@ -67,7 +66,7 @@ class CallEndpointTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> Any:
+    async def call(self, arguments: dict) -> Any:
         """Call the call_endpoint tool."""
         endpoint_id = arguments.get("endpoint_id")
         query = arguments.get("query") or {}

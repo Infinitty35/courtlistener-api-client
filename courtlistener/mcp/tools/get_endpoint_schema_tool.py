@@ -1,4 +1,3 @@
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.mcp.tools.mcp_tool import MCPTool
@@ -19,7 +18,7 @@ class GetEndpointSchemaTool(MCPTool):
     """
 
     name: str = "get_endpoint_schema"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Get Endpoint Schema",
         readOnlyHint=True,
         destructiveHint=False,
@@ -40,7 +39,7 @@ class GetEndpointSchemaTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> dict:
+    async def call(self, arguments: dict) -> dict:
         """Call the get_endpoint_schema tool."""
         endpoint_id = arguments.get("endpoint_id")
         for endpoint in ENDPOINTS.values():
@@ -63,5 +62,5 @@ class GetEndpointSchemaTool(MCPTool):
                 }
                 return schema
         # Unreachable: the schema's endpoint_id enum is validated in
-        # ToolHandlerMiddleware before dispatch. Guards the fall-through.
+        # `MCPTool.run` before dispatch. Guards the fall-through.
         raise ValueError(f"Endpoint '{endpoint_id}' not found")

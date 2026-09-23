@@ -4,7 +4,6 @@ from typing import Any
 
 from eyecite import get_citations, resolve_citations
 from eyecite.models import FullCaseCitation
-from fastmcp.server.context import Context
 from mcp.types import ToolAnnotations
 
 from courtlistener.exceptions import CourtListenerAPIError
@@ -57,7 +56,7 @@ class AnalyzeCitationsTool(MCPTool):
     """
 
     name: str = "analyze_citations"
-    annotations = ToolAnnotations(
+    annotations: ToolAnnotations = ToolAnnotations(
         title="Analyze Citations",
         readOnlyHint=True,
         destructiveHint=False,
@@ -99,7 +98,7 @@ class AnalyzeCitationsTool(MCPTool):
             "additionalProperties": False,
         }
 
-    async def __call__(self, arguments: dict, ctx: Context) -> str:
+    async def call(self, arguments: dict) -> str:
         text = arguments.get("text")
         opinion_id = arguments.get("opinion_id")
         cluster_id = arguments.get("cluster_id")

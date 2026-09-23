@@ -295,3 +295,17 @@ class TestBaseSessionIsAbstract:
             run(session._set("k", "v", 1))
         with pytest.raises(NotImplementedError):
             run(session._delete("k"))
+
+
+class TestRedisSessionPing:
+    def _session(self, **ping_kwargs) -> RedisSession:
+        session = RedisSession("redis://example.test:6379")
+        session._client = MagicMock(ping=AsyncMock(**ping_kwargs))
+        return session
+
+    def test_reports_a_reachable_server(self):
+        assert run(self._session(return_value=True).ping()) is True
+
+    def test_connection_failure_reads_as_unhealthy(self):
+        session = self._session(side_effect=RedisConnectionError("dns"))
+        assert run(session.ping()) is False

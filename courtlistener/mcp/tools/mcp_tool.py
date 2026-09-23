@@ -1,22 +1,51 @@
 from __future__ import annotations
 
+import json
+import logging
 from functools import cached_property
 from typing import Any
 
-from fastmcp.server.context import Context
+import httpx
+from fastmcp.exceptions import ToolError
 from fastmcp.server.dependencies import get_access_token
-from fastmcp.tools import Tool
+from fastmcp.tools import Tool, ToolResult
 from jsonschema import Draft202012Validator
-from mcp.types import ToolAnnotations
+from mcp.types import TextContent, ToolAnnotations
+from pydantic import Field
 
 from courtlistener import AsyncCourtListener
+from courtlistener.exceptions import CourtListenerAPIError, InvalidFieldsError
 from courtlistener.mcp.auth_types import TokenKind
-from courtlistener.mcp.exceptions import ToolArgumentValidationError
+from courtlistener.mcp.exceptions import (
+    SentryExemptToolError,
+    ToolArgumentValidationError,
+    UnauthorizedToolError,
+    UpstreamCourtListenerError,
+)
+from courtlistener.mcp.session import get_session, json_default
 
 
-class MCPTool:
-    name: str | None = None
-    annotations: ToolAnnotations | None = None
+class MCPTool(Tool):
+    """A FastMCP tool with a hand-written input schema and a CL client."""
+
+    annotations: ToolAnnotations
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+    def model_post_init(self, context: Any, /) -> None:
+        super().model_post_init(context)
+        if self.description is None:
+            self.description = type(self).__doc__ or ""
+        if not self.parameters:
+            self.parameters = self.get_input_schema()
+
+    def get_input_schema(self) -> dict:
+        raise NotImplementedError(
+            "get_input_schema must be implemented by subclass"
+        )
+
+    async def call(self, arguments: dict) -> dict | str:
+        """The tool body; ``run`` validates, translates errors, serializes."""
+        raise NotImplementedError("call must be implemented by subclass")
 
     def get_client(self) -> AsyncCourtListener:
         """Build a CourtListener client for the current request.
@@ -40,40 +69,13 @@ class MCPTool:
             return AsyncCourtListener(access_token=access_token.token)
         return AsyncCourtListener()
 
-    def get_tool(self) -> Tool:
-        if self.name is None:
-            raise ValueError("name must be set")
-        if self.annotations is None:
-            raise ValueError("annotations must be set")
-        return Tool(
-            name=self.name,
-            description=self.get_description(),
-            parameters=self.get_input_schema(),
-            annotations=self.annotations,
-        )
-
-    def get_description(self) -> str:
-        return self.__doc__ or ""
-
-    def get_input_schema(self) -> dict:
-        raise NotImplementedError(
-            "get_input_schema must be implemented by subclass"
-        )
-
-    @cached_property
-    def input_schema(self) -> dict:
-        """Cached input schema for the tool."""
-        return self.get_input_schema()
-
     @cached_property
     def input_validator(self) -> Draft202012Validator:
         """Cached validator for the tool's input schema."""
-        return Draft202012Validator(self.input_schema)
+        return Draft202012Validator(self.parameters)
 
     def validate_arguments(self, arguments: dict) -> None:
         """Check arguments against the tool's input schema."""
-        if self.name is None:
-            raise ValueError("name must be set")
         arguments = {
             key: value for key, value in arguments.items() if value is not None
         }
@@ -93,7 +95,7 @@ class MCPTool:
             if error.path:
                 argument_names.add(str(error.path[0]))
             elif error.validator == "additionalProperties":
-                known = self.input_schema.get("properties", {})
+                known = self.parameters.get("properties", {})
                 argument_names.update(
                     key for key in arguments if key not in known
                 )
@@ -112,5 +114,72 @@ class MCPTool:
             argument_names=sorted(argument_names),
         )
 
-    async def __call__(self, arguments: dict, ctx: Context) -> Any:
-        raise NotImplementedError("__call__ must be implemented by subclass")
+    async def run(self, arguments: dict[str, Any]) -> ToolResult:
+        """FastMCP's entry point for a tool call."""
+        self.validate_arguments(arguments)
+        try:
+            result = await self.call(arguments)
+        except InvalidFieldsError as exc:
+            raise ToolArgumentValidationError(
+                str(exc), tool_name=self.name, argument_names=["fields"]
+            ) from exc
+        except CourtListenerAPIError as exc:
+            error = await self.translate_api_error(exc)
+            raise error from exc
+        except httpx.HTTPError as exc:
+            raise UpstreamCourtListenerError(
+                f"Upstream CourtListener request failed: {exc}",
+                tool_name=self.name,
+                status="connection",
+            ) from exc
+
+        if isinstance(result, dict):
+            result = json.dumps(result, default=json_default, indent=2)
+        if not isinstance(result, str):
+            raise ValueError(f"Invalid result type: {type(result)}")
+        return ToolResult(content=[TextContent(type="text", text=result)])
+
+    async def translate_api_error(
+        self, exc: CourtListenerAPIError
+    ) -> ToolError:
+        """The ``ToolError`` a CourtListener API error surfaces as."""
+        if exc.status_code == 401:
+            # CL rejected a credential FastMCP accepted: drop it from
+            # the token cache so the next request re-verifies.
+            access_token = get_access_token()
+            if access_token is not None:
+                await get_session().invalidate_token(
+                    access_token.token,
+                    access_token.claims.get("token_kind", TokenKind.OAUTH),
+                )
+            message = (
+                "CourtListener rejected the request as unauthorized. "
+                "Your session may have expired; retry to re-authenticate."
+            )
+            if access_token is not None and access_token.claims.get("cached"):
+                # A cached token expiring mid-session is routine.
+                return SentryExemptToolError(message)
+            # A freshly verified token CL rejects is a real disagreement.
+            return UnauthorizedToolError(message, tool_name=self.name)
+        if exc.status_code == 429:
+            # The usage tool has its own throttle; don't point it at itself.
+            hint = (
+                ""
+                if self.name == "get_api_usage"
+                else "Call `get_api_usage` to see current usage and "
+                "when the limit resets. "
+            )
+            return SentryExemptToolError(
+                f"Rate limit exceeded: {exc}. {hint}For higher rate "
+                "limits, you can upgrade your membership at "
+                "https://donate.free.law/forms/membership"
+            )
+        if exc.status_code >= 500:
+            return UpstreamCourtListenerError(
+                f"CourtListener API error: {exc}",
+                tool_name=self.name,
+                status=str(exc.status_code),
+            )
+        return ToolError(
+            f"CourtListener API error: {exc}", log_level=logging.WARNING
+        )
