@@ -14,6 +14,15 @@ courts, etc.) use `get_endpoint_schema` to discover the available REST
 endpoint schemas, then `call_endpoint` to fetch from them. These endpoints expose
 fields and relationships that the search index does not.
 
+# Keyword vs. semantic search
+
+For opinions, `search` supports two modes. Keyword search (the default)
+matches the terms in `q` and suits known phrases, names, and citations.
+Semantic search (`semantic=true`, `type=o` only) matches meaning, so it
+finds cases that discuss a concept in different words. For open-ended
+research questions, start with one semantic query in plain language
+rather than many keyword variations, then use keyword search to narrow.
+
 # Use the `fields` argument
 
 CourtListener responses can be very large; restricting the fields returned

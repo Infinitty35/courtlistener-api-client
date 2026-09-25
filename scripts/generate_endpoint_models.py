@@ -179,10 +179,21 @@ SEARCH_FILTERS: dict[str, Any] = {
     },
     "q": {
         "type": "CharFilter",
+        "description": (
+            "Search query. Keyword search uses Lucene syntax: quoted "
+            "phrases, AND/OR/NOT, and field prefixes, e.g. "
+            '`"due process" AND NOT habeas` or `caseName:miranda`. '
+            "With `semantic=true`, write a natural-language question "
+            "instead."
+        ),
         "search_types": ["o", "r", "rd", "d", "p", "oa"],
     },
     "semantic": {
         "type": "BooleanFilter",
+        "description": (
+            "Run `q` as an embedding-based search instead of keywords; "
+            "better for conceptual questions."
+        ),
         "search_types": ["o"],
     },
     "available_only": {
