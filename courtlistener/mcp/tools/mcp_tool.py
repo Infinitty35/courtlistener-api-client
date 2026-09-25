@@ -74,6 +74,38 @@ class MCPTool(Tool):
         """Cached validator for the tool's input schema."""
         return Draft202012Validator(self.parameters)
 
+    @cached_property
+    def property_validators(self) -> dict[str, Draft202012Validator]:
+        """Cached validators for each top-level argument's schema."""
+        return {
+            name: Draft202012Validator(schema)
+            for name, schema in self.parameters.get("properties", {}).items()
+        }
+
+    def decode_json_arguments(self, arguments: dict) -> dict:
+        """Decode arguments that clients sent as JSON-encoded strings.
+
+        Some clients send ``[1, 2]`` as ``"[1, 2]"`` or ``5`` as ``"5"``.
+        """
+        decoded = dict(arguments)
+        for name, value in arguments.items():
+            validator = self.property_validators.get(name)
+            if validator is None or not isinstance(value, str):
+                continue
+            try:
+                parsed = json.loads(value)
+            except ValueError:
+                continue
+            if isinstance(parsed, str) or not validator.is_valid(parsed):
+                continue
+            # Containers win even where the raw string is also valid
+            # (e.g. `fields`); scalars only rescue an invalid string.
+            if isinstance(parsed, list | dict) or not validator.is_valid(
+                value
+            ):
+                decoded[name] = parsed
+        return decoded
+
     def validate_arguments(self, arguments: dict) -> None:
         """Check arguments against the tool's input schema."""
         arguments = {
@@ -116,6 +148,7 @@ class MCPTool(Tool):
 
     async def run(self, arguments: dict[str, Any]) -> ToolResult:
         """FastMCP's entry point for a tool call."""
+        arguments = self.decode_json_arguments(arguments)
         self.validate_arguments(arguments)
         try:
             result = await self.call(arguments)

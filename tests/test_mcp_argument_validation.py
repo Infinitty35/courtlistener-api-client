@@ -274,3 +274,59 @@ class TestFieldsNormalization:
         MCP_TOOLS["search"].validate_arguments(
             {"type": "o", "q": "test", "fields": "caseName,dateFiled"}
         )
+
+
+class TestJsonEncodedArguments:
+    """Some clients send arrays and ints as JSON text (Sentry MCP-75)."""
+
+    @pytest.mark.parametrize(
+        "tool,name,raw,expected",
+        [
+            (
+                "get_endpoint_item",
+                "fields",
+                '["id", "full_name"]',
+                ["id", "full_name"],
+            ),
+            ("search", "court", '["scotus", "ca4"]', ["scotus", "ca4"]),
+            ("search_document", "opinion_id", "[15, 85]", [15, 85]),
+            ("search_document", "opinion_id", "9429294", 9429294),
+            ("read_document", "chunk_index", "[0, 1, 2]", [0, 1, 2]),
+            (
+                "call_endpoint",
+                "query",
+                '{"court": "scotus"}',
+                {"court": "scotus"},
+            ),
+        ],
+    )
+    def test_decodes(self, tool, name, raw, expected):
+        decoded = MCP_TOOLS[tool].decode_json_arguments({name: raw})
+        assert decoded[name] == expected
+
+    @pytest.mark.parametrize(
+        "tool,name,raw",
+        [
+            ("search", "fields", "caseName,dateFiled"),
+            ("search", "q", '["not", "a", "list"]'),
+            ("search", "q", "1984"),
+            ("get_endpoint_item", "item_id", "123"),
+            ("read_document", "opinion_id", "not-an-integer"),
+        ],
+    )
+    def test_leaves_alone(self, tool, name, raw):
+        decoded = MCP_TOOLS[tool].decode_json_arguments({name: raw})
+        assert decoded[name] == raw
+
+    @pytest.mark.asyncio
+    async def test_run_passes_decoded_arguments(self, monkeypatch):
+        tool = MCP_TOOLS["search"]
+        seen = {}
+
+        async def fake_call(self, arguments):
+            seen.update(arguments)
+            return {}
+
+        monkeypatch.setattr(type(tool), "call", fake_call)
+        await tool.run({"q": "test", "fields": '["caseName","dateFiled"]'})
+        assert seen["fields"] == ["caseName", "dateFiled"]
