@@ -33,6 +33,8 @@ Changes:
 
 Fix:
 - Fix `range` lookups (e.g. `date_filed__range=["2020-01-01", "2020-12-31"]`) being sent as repeated query params, which CourtListener rejected with "Range query expects two values." They are now joined into one comma-separated value. Affects every `range` lookup on every endpoint.
+- Fix MCP arguments sent as JSON-encoded strings (e.g. `fields='["id", "full_name"]'`, `opinion_id='[1, 2]'`, `chunk_index='5'`) being rejected or, for `search`'s `fields`, silently mangled into bogus field names. `MCPTool.run` now decodes a string argument when the decoded value fits the argument's schema: containers are always decoded, scalars only when the raw string is invalid.
+- Invalid-choice errors now name only the bad entries (`Invalid value 'not_a_field' in 'id,not_a_field' for fields`) instead of quoting the whole input, report every bad list entry instead of just the first, and flag filter names requested as return fields (`` `docket_entry` is a filter on this endpoint, not a returnable field``).
 - Fix `generate_models.py` dropping `filter_class` 0.
 - Fix search's `court` filter mislabeled as `MultipleChoiceFilter` when should be `MultipleChoiceStringFilter`.
 
