@@ -23,11 +23,8 @@ from courtlistener.models import ENDPOINTS
 class SearchTool(MCPTool):
     """Search for case law, dockets, judges, and oral arguments.
 
-    When returning results to the user, consider presenting them as
-    color-coded visual cards with clickable "view on CourtListener" links
-    rather than plain  text, grouping by relevance or significance where
-    helpful. Fields like `absolute_url`, `caseName`, `dateFiled`, etc. can
-    be useful here.
+    `absolute_url` is a relative path; prefix it with
+    `https://www.courtlistener.com`. Pass IDs, not URLs, to other tools.
     """
 
     name: str = "search"
