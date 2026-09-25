@@ -5,7 +5,7 @@
 **Search**
 
 - **Source:** `courtlistener/mcp/tools/search_tool.py`
-- **Estimated definition size:** ~3338 tokens (description ~44, input schema ~3220; cl100k_base)
+- **Estimated definition size:** ~3340 tokens (description ~46, input schema ~3220; cl100k_base)
 - **Parameters:** 46 (0 required)
 - **Raw input schema:** [`search.inputs.json`](./search.inputs.json)
 
@@ -14,7 +14,7 @@
 Search for case law, dockets, judges, and oral arguments.
 
 `absolute_url` is a relative path; prefix it with
-`https://www.courtlistener.com`. Other tools take IDs, not URLs.
+`https://www.courtlistener.com`. Pass IDs, not URLs, to other tools.
 
 ## Annotations
 

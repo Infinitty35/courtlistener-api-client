@@ -24,7 +24,7 @@ class SearchTool(MCPTool):
     """Search for case law, dockets, judges, and oral arguments.
 
     `absolute_url` is a relative path; prefix it with
-    `https://www.courtlistener.com`. Other tools take IDs, not URLs.
+    `https://www.courtlistener.com`. Pass IDs, not URLs, to other tools.
     """
 
     name: str = "search"
