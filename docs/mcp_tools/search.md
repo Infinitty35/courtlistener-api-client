@@ -5,7 +5,7 @@
 **Search**
 
 - **Source:** `courtlistener/mcp/tools/search_tool.py`
-- **Estimated definition size:** ~3373 tokens (description ~78, input schema ~3220; cl100k_base)
+- **Estimated definition size:** ~3338 tokens (description ~44, input schema ~3220; cl100k_base)
 - **Parameters:** 46 (0 required)
 - **Raw input schema:** [`search.inputs.json`](./search.inputs.json)
 
@@ -13,11 +13,8 @@
 
 Search for case law, dockets, judges, and oral arguments.
 
-When returning results to the user, consider presenting them as
-color-coded visual cards with clickable "view on CourtListener" links
-rather than plain  text, grouping by relevance or significance where
-helpful. Fields like `absolute_url`, `caseName`, `dateFiled`, etc. can
-be useful here.
+`absolute_url` is a relative path; prefix it with
+`https://www.courtlistener.com`. Other tools take IDs, not URLs.
 
 ## Annotations
 
