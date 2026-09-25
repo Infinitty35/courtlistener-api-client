@@ -25,6 +25,18 @@ from courtlistener.mcp.exceptions import (
 from courtlistener.mcp.session import get_session, json_default
 
 
+def schema_allows_type(schema: dict, type_name: str) -> bool:
+    """Whether *schema* or any of its union branches declares *type_name*."""
+    declared = schema.get("type", [])
+    if type_name in ([declared] if isinstance(declared, str) else declared):
+        return True
+    return any(
+        schema_allows_type(branch, type_name)
+        for key in ("anyOf", "oneOf")
+        for branch in schema.get(key, [])
+    )
+
+
 class MCPTool(Tool):
     """A FastMCP tool with a hand-written input schema and a CL client."""
 
@@ -94,9 +106,15 @@ class MCPTool(Tool):
                 continue
             try:
                 parsed = json.loads(value)
-            except ValueError:
+            except (ValueError, RecursionError):
                 continue
             if isinstance(parsed, str) or not validator.is_valid(parsed):
+                continue
+            # jsonschema passes "5.0" as an integer; only keep floats
+            # where the schema actually allows a number.
+            if isinstance(parsed, float) and not schema_allows_type(
+                validator.schema, "number"
+            ):
                 continue
             # Containers win even where the raw string is also valid
             # (e.g. `fields`); scalars only rescue an invalid string.

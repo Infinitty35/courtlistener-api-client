@@ -193,9 +193,11 @@ def invalid_choice_error(
     hint: str = "",
 ) -> ValueError:
     """Build a compact invalid-choice error with near-miss suggestions."""
+    invalid_parts = list(dict.fromkeys(invalid_parts))
     candidates = list(choice_dict) + list(choice_dict.values())
+    # Fuzzy matching is O(candidates) per part; bound it for long lists.
     suggestions = "".join(
-        did_you_mean(part, candidates) for part in invalid_parts
+        did_you_mean(part, candidates) for part in invalid_parts[:5]
     )
     noun = "value" if len(invalid_parts) == 1 else "values"
     named = ", ".join(f"'{part}'" for part in invalid_parts)

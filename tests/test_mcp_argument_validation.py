@@ -330,3 +330,41 @@ class TestJsonEncodedArguments:
         monkeypatch.setattr(type(tool), "call", fake_call)
         await tool.run({"q": "test", "fields": '["caseName","dateFiled"]'})
         assert seen["fields"] == ["caseName", "dateFiled"]
+
+    def test_deeply_nested_json_left_alone(self):
+        raw = "[" * 100_000
+        decoded = MCP_TOOLS["search"].decode_json_arguments({"q": raw})
+        assert decoded["q"] == raw
+
+    def test_float_text_not_coerced_to_integer(self):
+        decoded = MCP_TOOLS["read_document"].decode_json_arguments(
+            {"chunk_index": "5.0"}
+        )
+        assert decoded["chunk_index"] == "5.0"
+
+    @pytest.mark.parametrize(
+        "schema,expected",
+        [
+            ({"type": "number"}, True),
+            ({"type": ["integer", "null"]}, False),
+            ({"anyOf": [{"type": "integer"}, {"type": "number"}]}, True),
+            ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, False),
+            ({"oneOf": [{"anyOf": [{"type": "number"}]}]}, True),
+            ({}, False),
+        ],
+    )
+    def test_schema_allows_type(self, schema, expected):
+        from courtlistener.mcp.tools.mcp_tool import schema_allows_type
+
+        assert schema_allows_type(schema, "number") is expected
+
+    def test_float_text_decoded_where_schema_allows_number(self):
+        tool = MCP_TOOLS["read_document"]
+        tool.property_validators["chunk_index"] = Draft202012Validator(
+            {"anyOf": [{"type": "integer"}, {"type": "number"}]}
+        )
+        try:
+            decoded = tool.decode_json_arguments({"chunk_index": "5.0"})
+        finally:
+            del tool.__dict__["property_validators"]
+        assert decoded["chunk_index"] == 5.0

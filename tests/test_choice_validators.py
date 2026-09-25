@@ -289,3 +289,12 @@ class TestInvalidChoiceNaming:
         with pytest.raises(ValidationError) as exc_info:
             court_of(court="scotus banana")
         assert "is a filter" not in str(exc_info.value)
+
+    def test_duplicates_named_once(self):
+        msg = self.recap_documents_error(["bogus", "bogus", "id"])
+        assert "Invalid value 'bogus' for fields" in msg
+
+    def test_suggestions_bounded_for_long_lists(self):
+        with pytest.raises(ValidationError) as exc_info:
+            court_of(court=[f"scotus{i}" for i in range(500)])
+        assert str(exc_info.value).count("Did you mean") <= 5
