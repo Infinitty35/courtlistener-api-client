@@ -263,3 +263,29 @@ class TestSuggestionQuality:
     def test_genuine_list_still_suggests_per_token(self):
         msg = self.error_for("scotus texapp2")
         assert "texapp" in msg
+
+
+class TestInvalidChoiceNaming:
+    """Errors name the bad entries, not the whole input (Sentry MCP-76)."""
+
+    def recap_documents_error(self, fields):
+        with pytest.raises(ValidationError) as exc_info:
+            ENDPOINTS["recap_documents"](fields=fields)
+        return str(exc_info.value)
+
+    def test_comma_string_names_only_the_bad_entry(self):
+        msg = self.recap_documents_error("id,document_number,not_a_field")
+        assert "Invalid value 'not_a_field' in " in msg
+
+    def test_list_names_every_bad_entry(self):
+        msg = self.recap_documents_error(["id", "bogus_one", "bogus_two"])
+        assert "Invalid values 'bogus_one', 'bogus_two' for fields" in msg
+
+    def test_filter_name_requested_as_field_gets_hint(self):
+        msg = self.recap_documents_error(["page_count", "docket_entry"])
+        assert "`docket_entry` is a filter on this endpoint" in msg
+
+    def test_no_filter_hint_for_other_choice_fields(self):
+        with pytest.raises(ValidationError) as exc_info:
+            court_of(court="scotus banana")
+        assert "is a filter" not in str(exc_info.value)

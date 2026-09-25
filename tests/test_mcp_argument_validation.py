@@ -235,6 +235,11 @@ class TestFieldErrors:
         assert "Did you mean" not in message
         assert "Fields must be one of:" in message
 
+    def test_filter_name_requested_as_field_gets_hint(self):
+        with pytest.raises(ValueError) as excinfo:
+            validate_model_fields(ENDPOINTS["parties"], ["id", "docket"])
+        assert "`docket` is a filter on this endpoint" in str(excinfo.value)
+
 
 class TestFieldsNormalization:
     """Models pass `fields` as comma/space-separated strings (the
