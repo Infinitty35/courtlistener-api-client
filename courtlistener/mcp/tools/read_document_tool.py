@@ -13,6 +13,16 @@ DEFAULT_CHUNK_SIZE = 8000
 MAX_CHUNKS_PER_CALL = 10
 
 
+def past_end_note(indexes: list[int], total_chunks: int) -> str:
+    """Explain chunk indexes past the end of a document."""
+    verb, pronoun = ("are", "them") if len(indexes) > 1 else ("is", "it")
+    return (
+        f"chunk_index {', '.join(map(str, indexes))} {verb} past the end "
+        f"of this document, which has {total_chunks} chunk(s) "
+        f"(0-{total_chunks - 1}). No text returned for {pronoun}."
+    )
+
+
 class ReadDocumentTool(MCPTool):
     """Read the full text of a court opinion or RECAP document.
 
@@ -168,14 +178,6 @@ class ReadDocumentTool(MCPTool):
             result["text"] = text
         elif isinstance(chunk_index, list):
             out_of_range = [i for i in chunk_index if i >= total_chunks]
-            if out_of_range:
-                raise ToolArgumentValidationError(
-                    f"chunk_index value(s) {out_of_range} are out of range; "
-                    f"document has {total_chunks} chunk(s) of "
-                    f"{chunk_size} characters each.",
-                    tool_name=self.name,
-                    argument_names=["chunk_index"],
-                )
             result["chunk_size"] = chunk_size
             result["total_chunks"] = total_chunks
             result["chunks"] = [
@@ -184,20 +186,18 @@ class ReadDocumentTool(MCPTool):
                     "text": text[i * chunk_size : (i + 1) * chunk_size],
                 }
                 for i in chunk_index
+                if i < total_chunks
             ]
+            if out_of_range:
+                result["note"] = past_end_note(out_of_range, total_chunks)
         else:
-            if chunk_index >= total_chunks:
-                raise ToolArgumentValidationError(
-                    f"chunk_index {chunk_index} is out of range; "
-                    f"document has {total_chunks} chunk(s) of "
-                    f"{chunk_size} characters each.",
-                    tool_name=self.name,
-                    argument_names=["chunk_index"],
-                )
-            start = chunk_index * chunk_size
             result["chunk_index"] = chunk_index
             result["chunk_size"] = chunk_size
             result["total_chunks"] = total_chunks
-            result["text"] = text[start : start + chunk_size]
+            if chunk_index >= total_chunks:
+                result["note"] = past_end_note([chunk_index], total_chunks)
+            else:
+                start = chunk_index * chunk_size
+                result["text"] = text[start : start + chunk_size]
 
         return result
