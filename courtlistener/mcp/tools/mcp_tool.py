@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Mapping
 from functools import cached_property
 from typing import Any
 
@@ -25,7 +26,7 @@ from courtlistener.mcp.exceptions import (
 from courtlistener.mcp.session import get_session, json_default
 
 
-def schema_allows_type(schema: dict, type_name: str) -> bool:
+def schema_allows_type(schema: Mapping[str, Any], type_name: str) -> bool:
     """Whether *schema* or any of its union branches declares *type_name*."""
     declared = schema.get("type", [])
     if type_name in ([declared] if isinstance(declared, str) else declared):
@@ -113,7 +114,7 @@ class MCPTool(Tool):
             # jsonschema passes "5.0" as an integer; only keep floats
             # where the schema actually allows a number.
             if isinstance(parsed, float) and not schema_allows_type(
-                validator.schema, "number"
+                self.parameters["properties"][name], "number"
             ):
                 continue
             # Containers win even where the raw string is also valid

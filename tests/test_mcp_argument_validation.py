@@ -360,11 +360,15 @@ class TestJsonEncodedArguments:
 
     def test_float_text_decoded_where_schema_allows_number(self):
         tool = MCP_TOOLS["read_document"]
-        tool.property_validators["chunk_index"] = Draft202012Validator(
-            {"anyOf": [{"type": "integer"}, {"type": "number"}]}
-        )
+        properties = tool.parameters["properties"]
+        original = properties["chunk_index"]
+        properties["chunk_index"] = {
+            "anyOf": [{"type": "integer"}, {"type": "number"}]
+        }
+        tool.__dict__.pop("property_validators", None)
         try:
             decoded = tool.decode_json_arguments({"chunk_index": "5.0"})
         finally:
-            del tool.__dict__["property_validators"]
+            properties["chunk_index"] = original
+            tool.__dict__.pop("property_validators", None)
         assert decoded["chunk_index"] == 5.0
