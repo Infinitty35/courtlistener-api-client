@@ -235,6 +235,11 @@ class TestFieldErrors:
         assert "Did you mean" not in message
         assert "Fields must be one of:" in message
 
+    def test_filter_name_requested_as_field_gets_hint(self):
+        with pytest.raises(ValueError) as excinfo:
+            validate_model_fields(ENDPOINTS["parties"], ["id", "docket"])
+        assert "`docket` is a filter on this endpoint" in str(excinfo.value)
+
 
 class TestFieldsNormalization:
     """Models pass `fields` as comma/space-separated strings (the
@@ -269,3 +274,101 @@ class TestFieldsNormalization:
         MCP_TOOLS["search"].validate_arguments(
             {"type": "o", "q": "test", "fields": "caseName,dateFiled"}
         )
+
+
+class TestJsonEncodedArguments:
+    """Some clients send arrays and ints as JSON text (Sentry MCP-75)."""
+
+    @pytest.mark.parametrize(
+        "tool,name,raw,expected",
+        [
+            (
+                "get_endpoint_item",
+                "fields",
+                '["id", "full_name"]',
+                ["id", "full_name"],
+            ),
+            ("search", "court", '["scotus", "ca4"]', ["scotus", "ca4"]),
+            ("search_document", "opinion_id", "[15, 85]", [15, 85]),
+            ("search_document", "opinion_id", "9429294", 9429294),
+            ("read_document", "chunk_index", "[0, 1, 2]", [0, 1, 2]),
+            (
+                "call_endpoint",
+                "query",
+                '{"court": "scotus"}',
+                {"court": "scotus"},
+            ),
+        ],
+    )
+    def test_decodes(self, tool, name, raw, expected):
+        decoded = MCP_TOOLS[tool].decode_json_arguments({name: raw})
+        assert decoded[name] == expected
+
+    @pytest.mark.parametrize(
+        "tool,name,raw",
+        [
+            ("search", "fields", "caseName,dateFiled"),
+            ("search", "q", '["not", "a", "list"]'),
+            ("search", "q", "1984"),
+            ("get_endpoint_item", "item_id", "123"),
+            ("read_document", "opinion_id", "not-an-integer"),
+        ],
+    )
+    def test_leaves_alone(self, tool, name, raw):
+        decoded = MCP_TOOLS[tool].decode_json_arguments({name: raw})
+        assert decoded[name] == raw
+
+    @pytest.mark.asyncio
+    async def test_run_passes_decoded_arguments(self, monkeypatch):
+        tool = MCP_TOOLS["search"]
+        seen = {}
+
+        async def fake_call(self, arguments):
+            seen.update(arguments)
+            return {}
+
+        monkeypatch.setattr(type(tool), "call", fake_call)
+        await tool.run({"q": "test", "fields": '["caseName","dateFiled"]'})
+        assert seen["fields"] == ["caseName", "dateFiled"]
+
+    def test_deeply_nested_json_left_alone(self):
+        raw = "[" * 100_000
+        decoded = MCP_TOOLS["search"].decode_json_arguments({"q": raw})
+        assert decoded["q"] == raw
+
+    def test_float_text_not_coerced_to_integer(self):
+        decoded = MCP_TOOLS["read_document"].decode_json_arguments(
+            {"chunk_index": "5.0"}
+        )
+        assert decoded["chunk_index"] == "5.0"
+
+    @pytest.mark.parametrize(
+        "schema,expected",
+        [
+            ({"type": "number"}, True),
+            ({"type": ["integer", "null"]}, False),
+            ({"anyOf": [{"type": "integer"}, {"type": "number"}]}, True),
+            ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, False),
+            ({"oneOf": [{"anyOf": [{"type": "number"}]}]}, True),
+            ({}, False),
+        ],
+    )
+    def test_schema_allows_type(self, schema, expected):
+        from courtlistener.mcp.tools.mcp_tool import schema_allows_type
+
+        assert schema_allows_type(schema, "number") is expected
+
+    def test_float_text_decoded_where_schema_allows_number(self):
+        tool = MCP_TOOLS["read_document"]
+        properties = tool.parameters["properties"]
+        original = properties["chunk_index"]
+        properties["chunk_index"] = {
+            "anyOf": [{"type": "integer"}, {"type": "number"}]
+        }
+        tool.__dict__.pop("property_validators", None)
+        try:
+            decoded = tool.decode_json_arguments({"chunk_index": "5.0"})
+        finally:
+            properties["chunk_index"] = original
+            tool.__dict__.pop("property_validators", None)
+        assert decoded["chunk_index"] == 5.0

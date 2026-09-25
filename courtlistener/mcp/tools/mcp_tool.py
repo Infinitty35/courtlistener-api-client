@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Mapping
 from functools import cached_property
 from typing import Any
 
@@ -23,6 +24,18 @@ from courtlistener.mcp.exceptions import (
     UpstreamCourtListenerError,
 )
 from courtlistener.mcp.session import get_session, json_default
+
+
+def schema_allows_type(schema: Mapping[str, Any], type_name: str) -> bool:
+    """Whether *schema* or any of its union branches declares *type_name*."""
+    declared = schema.get("type", [])
+    if type_name in ([declared] if isinstance(declared, str) else declared):
+        return True
+    return any(
+        schema_allows_type(branch, type_name)
+        for key in ("anyOf", "oneOf")
+        for branch in schema.get(key, [])
+    )
 
 
 class MCPTool(Tool):
@@ -74,6 +87,44 @@ class MCPTool(Tool):
         """Cached validator for the tool's input schema."""
         return Draft202012Validator(self.parameters)
 
+    @cached_property
+    def property_validators(self) -> dict[str, Draft202012Validator]:
+        """Cached validators for each top-level argument's schema."""
+        return {
+            name: Draft202012Validator(schema)
+            for name, schema in self.parameters.get("properties", {}).items()
+        }
+
+    def decode_json_arguments(self, arguments: dict) -> dict:
+        """Decode arguments that clients sent as JSON-encoded strings.
+
+        Some clients send ``[1, 2]`` as ``"[1, 2]"`` or ``5`` as ``"5"``.
+        """
+        decoded = dict(arguments)
+        for name, value in arguments.items():
+            validator = self.property_validators.get(name)
+            if validator is None or not isinstance(value, str):
+                continue
+            try:
+                parsed = json.loads(value)
+            except (ValueError, RecursionError):
+                continue
+            if isinstance(parsed, str) or not validator.is_valid(parsed):
+                continue
+            # jsonschema passes "5.0" as an integer; only keep floats
+            # where the schema actually allows a number.
+            if isinstance(parsed, float) and not schema_allows_type(
+                self.parameters["properties"][name], "number"
+            ):
+                continue
+            # Containers win even where the raw string is also valid
+            # (e.g. `fields`); scalars only rescue an invalid string.
+            if isinstance(parsed, list | dict) or not validator.is_valid(
+                value
+            ):
+                decoded[name] = parsed
+        return decoded
+
     def validate_arguments(self, arguments: dict) -> None:
         """Check arguments against the tool's input schema."""
         arguments = {
@@ -116,6 +167,7 @@ class MCPTool(Tool):
 
     async def run(self, arguments: dict[str, Any]) -> ToolResult:
         """FastMCP's entry point for a tool call."""
+        arguments = self.decode_json_arguments(arguments)
         self.validate_arguments(arguments)
         try:
             result = await self.call(arguments)

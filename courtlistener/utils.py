@@ -94,7 +94,7 @@ def validate_model_fields(
                 if invalid_fields:
                     suggestions = "".join(
                         did_you_mean(f, values) for f in invalid_fields
-                    )
+                    ) + filter_only_hint(model, invalid_fields)
                     raise InvalidFieldsError(
                         f"Invalid fields: {invalid_fields}.{suggestions}\n"
                         f"Fields must be one of: {values}"
@@ -173,19 +173,38 @@ def get_valid_choice(
     return None
 
 
+def filter_only_hint(model: type["Endpoint"], names: Iterable[Any]) -> str:
+    """Flag names that are filters on *model*, not returnable fields."""
+    return "".join(
+        f" `{name}` is a filter on this endpoint, not a returnable field."
+        for name in names
+        if isinstance(name, str)
+        and name != "fields"
+        and name in model.model_fields
+    )
+
+
 def invalid_choice_error(
     field_name: str | None,
-    value: Any,
     invalid_parts: list[Any],
     choice_dict: dict[str, str] | dict[int, str],
+    *,
+    within: str | None = None,
+    hint: str = "",
 ) -> ValueError:
     """Build a compact invalid-choice error with near-miss suggestions."""
+    invalid_parts = list(dict.fromkeys(invalid_parts))
     candidates = list(choice_dict) + list(choice_dict.values())
+    # Fuzzy matching is O(candidates) per part; bound it for long lists.
     suggestions = "".join(
-        did_you_mean(part, candidates) for part in invalid_parts
+        did_you_mean(part, candidates) for part in invalid_parts[:5]
     )
+    noun = "value" if len(invalid_parts) == 1 else "values"
+    named = ", ".join(f"'{part}'" for part in invalid_parts)
+    context = f" in '{within}'" if within else ""
     return ValueError(
-        f"Invalid value '{value}' for {field_name}.{suggestions} "
+        f"Invalid {noun} {named}{context} for {field_name}."
+        f"{suggestions}{hint} "
         "MCP clients can use the `get_choices` tool to list valid values."
     )
 
@@ -197,7 +216,7 @@ def choice_validator(value: Any, info: ValidationInfo) -> None | int | str:
     valid_value = get_valid_choice(value, choice_dict)
     if valid_value is not None:
         return valid_value
-    raise invalid_choice_error(info.field_name, value, [value], choice_dict)
+    raise invalid_choice_error(info.field_name, [value], choice_dict)
 
 
 def multiple_choice_validator(
@@ -208,6 +227,8 @@ def multiple_choice_validator(
     choice_dict = get_choice_dict_from_info(info)
     values_list = values if isinstance(values, list) else [values]
     valid_values: list[int | str] = []
+    invalid_parts: list[Any] = []
+    within = None
     for value in values_list:
         # Strip stray leading/trailing delimiters
         cleaned = value.strip(" ,\t\r\n") if isinstance(value, str) else value
@@ -225,15 +246,27 @@ def multiple_choice_validator(
         if len(tokens) > 1 and all(v is not None for v in token_values):
             valid_values.extend(token_values)  # type: ignore[arg-type]
             continue
-        # Suggest per token only when some token is independently valid
+        # Name tokens only when some token is independently valid
         if len(tokens) > 1 and any(v is not None for v in token_values):
-            invalid_parts = [
+            invalid_parts.extend(
                 t for t, v in zip(tokens, token_values) if v is None
-            ]
+            )
+            within = value
         else:
-            invalid_parts = [cleaned]
+            invalid_parts.append(cleaned)
+    if invalid_parts:
+        if len(values_list) > 1:
+            within = None
+        hint = ""
+        if info.field_name == "fields":
+            model = get_endpoint_model_from_info(info)
+            hint = filter_only_hint(model, invalid_parts)
         raise invalid_choice_error(
-            info.field_name, value, invalid_parts, choice_dict
+            info.field_name,
+            invalid_parts,
+            choice_dict,
+            within=within,
+            hint=hint,
         )
     return valid_values[0] if len(valid_values) == 1 else valid_values
 
