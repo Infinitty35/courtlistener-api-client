@@ -517,9 +517,13 @@ string | array of string
 
 string
 
+Search query. Keyword search uses Lucene syntax: quoted phrases, AND/OR/NOT, and field prefixes, e.g. `"due process" AND NOT habeas` or `caseName:miranda`. With `semantic=true`, write a natural-language question instead.
+
 ### `semantic`
 
 boolean
+
+Run `q` as an embedding-based search instead of keywords; better for conceptual questions.
 
 ### `available_only`
 

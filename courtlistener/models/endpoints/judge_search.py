@@ -1864,6 +1864,7 @@ class JudgeSearchEndpoint(Endpoint):
         None | str,
         Field(
             None,
+            description='Search query. Keyword search uses Lucene syntax: quoted phrases, AND/OR/NOT, and field prefixes, e.g. `"due process" AND NOT habeas` or `caseName:miranda`. With `semantic=true`, write a natural-language question instead.',
         ),
     ]
     name: Annotated[

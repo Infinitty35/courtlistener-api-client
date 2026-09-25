@@ -5,7 +5,7 @@
 **Search**
 
 - **Source:** `courtlistener/mcp/tools/search_tool.py`
-- **Estimated definition size:** ~3296 tokens (description ~78, input schema ~3143; cl100k_base)
+- **Estimated definition size:** ~3373 tokens (description ~78, input schema ~3220; cl100k_base)
 - **Parameters:** 46 (0 required)
 - **Raw input schema:** [`search.inputs.json`](./search.inputs.json)
 
@@ -94,11 +94,15 @@ Use the `get_choices` tool with endpoint_id="search" and field_name="court" to s
 
 string | null · optional
 
+Search query. Keyword search uses Lucene syntax: quoted phrases, AND/OR/NOT, and field prefixes, e.g. `"due process" AND NOT habeas` or `caseName:miranda`. With `semantic=true`, write a natural-language question instead.
+
 Valid when type in: ['o', 'r', 'rd', 'd', 'p', 'oa']
 
 ### `semantic`
 
 boolean | null · optional
+
+Run `q` as an embedding-based search instead of keywords; better for conceptual questions.
 
 Valid when type in: ['o']
 
